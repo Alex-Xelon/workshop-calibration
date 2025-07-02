@@ -1,0 +1,25 @@
+[project]
+name = "calibration-test"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Alexandre Lemiere", email = "alexandre.lemiere11@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "ace-tools>=0.0",
+    "marimo[recommended]>=0.14.8",
+    "matplotlib>=3.10.3",
+    "numpy>=2.3.1",
+    "pre-commit>=4.2.0",
+    "python-dotenv>=1.1.0",
+    "scikit-learn>=1.7.0",
+    "uncertainty-calibration>=0.1.4",
+    "venn-abers>=1.4.6",
+    "xgboost>=3.0.2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
