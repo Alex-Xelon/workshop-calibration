@@ -1,0 +1,19 @@
+{
+  "name": "AI trustable",
+  "image": "mcr.microsoft.com/devcontainers/python:3.13",
+  "features": {
+    "ghcr.io/devcontainers/features/gh-cli:1": {},
+    "ghcr.io/devcontainers/features/uv:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "marimo-ai.marimo-vscode"
+      ]
+    }
+  },
+  "postCreateCommand": "uv pip install --system --quiet --extra-index-url https://pypi.org/simple",
+  "remoteUser": "vscode"
+}

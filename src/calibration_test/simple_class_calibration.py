@@ -6,22 +6,22 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    import os
     import numpy as np
     import pandas as pd
     import matplotlib.pyplot as plt
     from sklearn.model_selection import train_test_split
     from sklearn.linear_model import LogisticRegression
     from sklearn.ensemble import RandomForestClassifier
-    from sklearn.svm import SVC
     from sklearn.naive_bayes import GaussianNB
     from sklearn.calibration import CalibratedClassifierCV, calibration_curve
     from sklearn.metrics import brier_score_loss, log_loss, f1_score
     from sklearn.frozen import FrozenEstimator
     from venn_abers import VennAbersCalibrator
+    import xgboost as xgb
     import calibration as cal
     from sklearn.preprocessing import StandardScaler
     from sklearn.utils import resample
+    import gc
     import warnings
 
     warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -31,20 +31,20 @@ def _():
         GaussianNB,
         LogisticRegression,
         RandomForestClassifier,
-        SVC,
         StandardScaler,
         VennAbersCalibrator,
         brier_score_loss,
         cal,
         calibration_curve,
         f1_score,
+        gc,
         log_loss,
         np,
-        os,
         pd,
         plt,
         resample,
         train_test_split,
+        xgb,
     )
 
 
@@ -53,7 +53,7 @@ def _(StandardScaler, pd, resample, train_test_split):
     # Étape 1 : Génération d'un jeu de données binaire
     print("Génération d'un jeu de données synthétique")
 
-    random_state = 42
+    random_state = 28  # 40
 
     df = pd.read_csv(
         "hf://datasets/mihaicata/diabetes/all_data_processed.tsv", sep="\t"
@@ -119,16 +119,22 @@ def _(StandardScaler, pd, resample, train_test_split):
 
 
 @app.cell
-def _(LogisticRegression, RandomForestClassifier, SVC, random_state):
+def _(LogisticRegression, RandomForestClassifier, random_state, xgb):
     def define_model():
         # Étape 2 : Définir les modèles à tester
         print("Définition des modèles à tester")
         models = {
             "Logistic Regression": LogisticRegression(
-                max_iter=5000, random_state=random_state
+                max_iter=5000,
+                random_state=random_state,
             ),
-            "Random Forest": RandomForestClassifier(n_estimators=10),
-            "SVM (probability = False)": SVC(probability=False),
+            "Random Forest": RandomForestClassifier(
+                n_estimators=10, random_state=random_state
+            ),
+            "XGBoost": xgb.XGBClassifier(
+                tree_method="hist",
+                random_state=random_state,
+            ),
         }
         for name in models.keys():
             print(f"- {name}")
@@ -148,21 +154,15 @@ def _(
     f1_score,
     log_loss,
     models,
-    np,
     results,
     y_test,
     y_train,
 ):
-    # Étape 3 : Évaluer chaque modèle sans calibration, a l'exception de SVM sans probabilités
+    # Étape 3 : Évaluer chaque modèle sans calibration
     for name, model in models.items():
         print(f"\n Entraînement du modèle : {name}")
         model.fit(X_train, y_train)
-        if name == "SVM (probability = False)":
-            # Utilisation de decision_function et application de la sigmoïde
-            decision = model.decision_function(X_test)
-            probs = 1 / (1 + np.exp(-decision))
-        else:
-            probs = model.predict_proba(X_test)[:, 1]
+        probs = model.predict_proba(X_test)[:, 1]
         acc = f1_score(y_test, model.predict(X_test))
         brier = brier_score_loss(y_test, probs)
         logloss = log_loss(y_test, probs)
@@ -233,16 +233,8 @@ def _(
             name_method = f"{name} + Venn-ABERS"
             print(f"\n Calibration de {name} avec méthode Venn-ABERS")
             base_model = models[name].fit(X_proper_train, y_proper_train)
-            if name == "SVM (probability = False)":
-                # Utiliser decision_function + sigmoïde pour obtenir des "pseudo-probas"
-                p_cal = 1 / (1 + np.exp(-base_model.decision_function(X_cal)))
-                p_test = 1 / (1 + np.exp(-base_model.decision_function(X_test)))
-                # VennAbersCalibrator attend des tableaux 2D
-                p_cal = np.vstack([1 - p_cal, p_cal]).T
-                p_test = np.vstack([1 - p_test, p_test]).T
-            else:
-                p_cal = base_model.predict_proba(X_cal)
-                p_test = base_model.predict_proba(X_test)
+            p_cal = base_model.predict_proba(X_cal)
+            p_test = base_model.predict_proba(X_test)
             va = VennAbersCalibrator()
             probs = va.predict_proba(p_cal=p_cal, y_cal=np.array(y_cal), p_test=p_test)[
                 :, 1
@@ -271,11 +263,10 @@ def _(
 
 
 @app.cell
-def _(calibration_curve, os, pd, plt, results, y_test):
+def _(calibration_curve, pd, plt, results, y_test):
     # Step 5: Plot calibration curves
     def plot():
         print("\n Génération des courbes de calibration 1/2")
-        os.makedirs("plots", exist_ok=True)
         plt.figure(figsize=(8, 6))
         for name in [
             "Random Forest",
@@ -299,10 +290,10 @@ def _(calibration_curve, os, pd, plt, results, y_test):
         print("\n Génération des courbes de calibration 2/2")
         plt.figure(figsize=(8, 6))
         for name in [
-            "SVM (probability = False)",
-            "SVM (probability = False) + sigmoid",
-            "SVM (probability = False) + isotonic",
-            "SVM (probability = False) + Venn-ABERS",
+            "XGBoost",
+            "XGBoost + sigmoid",
+            "XGBoost + isotonic",
+            "XGBoost + Venn-ABERS",
         ]:
             res = results[name]
             prob_true, prob_pred = calibration_curve(y_test, res["probs"], n_bins=10)
@@ -352,6 +343,7 @@ def _(
     brier_score_loss,
     cal,
     f1_score,
+    gc,
     log_loss,
     np,
     pd,
@@ -382,10 +374,13 @@ def _(
         results["brier"].append(brier_score_loss(y_test, clf_prob))
         results["log loss"].append(log_loss(y_test, clf_prob))
         results["ece"].append(cal.get_calibration_error(clf_prob, y_test))
+        print("Uncalibrated model ✅")
 
         # IVAP
         va = VennAbersCalibrator(
-            estimator=GaussianNB(), inductive=True, cal_size=0.2, shuffle=False
+            estimator=GaussianNB(),
+            inductive=True,
+            cal_size=0.2,
         )
         va.fit(X_train, y_train)
         va_inductive_prob = va.predict_proba(X_test)[:, 1]
@@ -393,6 +388,7 @@ def _(
         results["brier"].append(brier_score_loss(y_test, va_inductive_prob))
         results["log loss"].append(log_loss(y_test, va_inductive_prob))
         results["ece"].append(cal.get_calibration_error(va_inductive_prob, y_test))
+        print("IVAP model ✅")
 
         # CVAP
         va = VennAbersCalibrator(estimator=GaussianNB(), inductive=False, n_splits=2)
@@ -402,6 +398,7 @@ def _(
         results["brier"].append(brier_score_loss(y_test, va_cv_prob))
         results["log loss"].append(log_loss(y_test, va_cv_prob))
         results["ece"].append(cal.get_calibration_error(va_cv_prob, y_test))
+        print("CVAP model ✅")
 
         # Prefit
         X_train_proper, X_cal, y_train_proper, y_cal = train_test_split(
@@ -419,6 +416,7 @@ def _(
         results["brier"].append(brier_score_loss(y_test, va_prefit_prob))
         results["log loss"].append(log_loss(y_test, va_prefit_prob))
         results["ece"].append(cal.get_calibration_error(va_prefit_prob, y_test))
+        print("Prefit model ✅")
 
         # Isotonic (cv=5)
         iso = CalibratedClassifierCV(GaussianNB(), method="isotonic", cv=5)
@@ -428,6 +426,7 @@ def _(
         results["brier"].append(brier_score_loss(y_test, iso_prob))
         results["log loss"].append(log_loss(y_test, iso_prob))
         results["ece"].append(cal.get_calibration_error(iso_prob, y_test))
+        print("Isotonic model ✅")
 
         # Isotonic prefit
         clf.fit(X_train_proper, y_train_proper)
@@ -438,6 +437,7 @@ def _(
         results["brier"].append(brier_score_loss(y_test, iso_prefit_prob))
         results["log loss"].append(log_loss(y_test, iso_prefit_prob))
         results["ece"].append(cal.get_calibration_error(iso_prefit_prob, y_test))
+        print("Isotonic prefit model ✅")
 
         # Sigmoid (cv=5)
         sig = CalibratedClassifierCV(GaussianNB(), method="sigmoid", cv=5)
@@ -447,6 +447,7 @@ def _(
         results["brier"].append(brier_score_loss(y_test, sig_prob))
         results["log loss"].append(log_loss(y_test, sig_prob))
         results["ece"].append(cal.get_calibration_error(sig_prob, y_test))
+        print("Sigmoid model ✅")
 
         # Sigmoid prefit
         clf.fit(X_train_proper, y_train_proper)
@@ -457,6 +458,9 @@ def _(
         results["brier"].append(brier_score_loss(y_test, sig_prefit_prob))
         results["log loss"].append(log_loss(y_test, sig_prefit_prob))
         results["ece"].append(cal.get_calibration_error(sig_prefit_prob, y_test))
+        print("Sigmoid prefit model ✅ \n")
+
+        gc.collect()
 
         # Display results
         df_loss = pd.DataFrame(results, index=methods).T.round(3)
