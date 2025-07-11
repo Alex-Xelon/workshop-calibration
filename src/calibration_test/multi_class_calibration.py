@@ -1,16 +1,18 @@
 import marimo
 
-__generated_with = "0.14.8"
+__generated_with = "0.14.10"
 app = marimo.App(width="medium")
 
 
 @app.cell
 def _():
+    import marimo as mo
     import pandas as pd
     import numpy as np
-    from sklearn.metrics import log_loss, brier_score_loss, accuracy_score
+    import random
+    from scipy.io import arff
+    from sklearn.metrics import log_loss, brier_score_loss, f1_score
     from sklearn.model_selection import train_test_split
-    from sklearn.datasets import make_classification
     from sklearn.calibration import CalibratedClassifierCV
     from sklearn.linear_model import LogisticRegression
     from sklearn.svm import SVC
@@ -32,51 +34,58 @@ def _():
         RandomForestClassifier,
         SVC,
         VennAbersCalibrator,
-        accuracy_score,
+        arff,
         brier_score_loss,
         cal,
+        f1_score,
         log_loss,
-        make_classification,
+        mo,
         np,
         pd,
+        random,
         train_test_split,
     )
 
 
 @app.cell
-def _():
-    import kagglehub
+def _(arff, pd, random, train_test_split):
+    random.seed(1)
 
-    # Download latest version
-    path = kagglehub.dataset_download("andrewmvd/medical-mnist")
+    data = arff.loadarff("data/dataset_multiclass.arff")
+    df = pd.DataFrame(data[0])
 
-    print("Path to dataset files:", path)
-    return
+    X = df.drop("Class", axis=1)
+    y = df["Class"].astype(int).subtract(1)
 
-
-@app.cell
-def _(make_classification, np, pd, train_test_split):
-    random_state = 1
-    np.random.seed(seed=1)
-
-    X, y = make_classification(
-        n_samples=10000,
-        n_features=20,
-        n_informative=4,
-        n_redundant=2,
-        random_state=random_state,
-        n_classes=6,
-    )
-    X = pd.DataFrame(X)
-    y = pd.Series(y)
+    print(y.value_counts())
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, shuffle=False, test_size=0.99
+        X,
+        y,
+        test_size=0.90,
+        shuffle=False,
     )
 
     X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
-        X_train, y_train, shuffle=False, test_size=0.2
+        X_train,
+        y_train,
+        test_size=0.2,
+        shuffle=False,
     )
+
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.width", None)
+
+    print(X_train.head())
+    print(y_train.head())
+    print(X_test.head())
+    print(y_test.head())
+    print(X_proper_train.head())
+    print(y_proper_train.head())
+    print(X_cal.head())
+    print(y_cal.head())
+
     return (
         X_cal,
         X_proper_train,
@@ -116,9 +125,9 @@ def _(
     X_proper_train,
     X_test,
     X_train,
-    accuracy_score,
     brier_score_loss,
     cal,
+    f1_score,
     log_loss,
     np,
     pd,
@@ -139,7 +148,7 @@ def _(
         clf.fit(X_train, y_train)
         p_pred = clf.predict_proba(X_test)
         y_pred = clf.predict(X_test)
-        acc_list.append(accuracy_score(y_test, y_pred))
+        acc_list.append(f1_score(y_test, y_pred, average="weighted"))
         log_loss_list.append(log_loss(y_test, p_pred))
         brier_loss_list.append(brier_score_loss(y_test, p_pred))
         ece_list.append(cal.get_calibration_error(p_pred, y_test))
@@ -150,7 +159,7 @@ def _(
         cal_sigm.fit(X_cal, y_cal)
         p_pred = cal_sigm.predict_proba(X_test)
         y_pred = cal_sigm.predict(X_test)
-        acc_list.append(accuracy_score(y_test, y_pred))
+        acc_list.append(f1_score(y_test, y_pred, average="weighted"))
         log_loss_list.append(log_loss(y_test, p_pred))
         brier_loss_list.append(brier_score_loss(y_test, p_pred))
         ece_list.append(cal.get_calibration_error(p_pred, y_test))
@@ -160,7 +169,7 @@ def _(
         cal_iso.fit(X_cal, y_cal)
         p_pred = cal_iso.predict_proba(X_test)
         y_pred = cal_iso.predict(X_test)
-        acc_list.append(accuracy_score(y_test, y_pred))
+        acc_list.append(f1_score(y_test, y_pred, average="weighted"))
         log_loss_list.append(log_loss(y_test, p_pred))
         brier_loss_list.append(brier_score_loss(y_test, p_pred))
         ece_list.append(cal.get_calibration_error(p_pred, y_test))
@@ -170,7 +179,7 @@ def _(
         cal_sigm_cv.fit(X_train, y_train)
         p_pred = cal_sigm_cv.predict_proba(X_test)
         y_pred = cal_sigm_cv.predict(X_test)
-        acc_list.append(accuracy_score(y_test, y_pred))
+        acc_list.append(f1_score(y_test, y_pred, average="weighted"))
         log_loss_list.append(log_loss(y_test, p_pred))
         brier_loss_list.append(brier_score_loss(y_test, p_pred))
         ece_list.append(cal.get_calibration_error(p_pred, y_test))
@@ -180,17 +189,17 @@ def _(
         cal_iso_cv.fit(X_train, y_train)
         p_pred = cal_iso_cv.predict_proba(X_test)
         y_pred = cal_iso_cv.predict(X_test)
-        acc_list.append(accuracy_score(y_test, y_pred))
+        acc_list.append(f1_score(y_test, y_pred, average="weighted"))
         log_loss_list.append(log_loss(y_test, p_pred))
         brier_loss_list.append(brier_score_loss(y_test, p_pred))
         ece_list.append(cal.get_calibration_error(p_pred, y_test))
 
         print("ivap")
-        va = VennAbersCalibrator(clf, inductive=True, cal_size=0.2, random_state=42)
+        va = VennAbersCalibrator(clf, inductive=True, cal_size=0.2)
         va.fit(np.asarray(X_train), np.asarray(y_train))
         p_pred_va = va.predict_proba(np.array(X_test))
         y_pred = va.predict(np.array(X_test), one_hot=False)
-        acc_list.append(accuracy_score(y_test, y_pred))
+        acc_list.append(f1_score(y_test, y_pred, average="weighted"))
         log_loss_list.append(log_loss(y_test, p_pred_va))
         brier_loss_list.append(brier_score_loss(y_test, p_pred_va))
         ece_list.append(cal.get_calibration_error(p_pred_va, y_test))
@@ -200,7 +209,7 @@ def _(
         va_cv.fit(np.asarray(X_train), np.asarray(y_train))
         p_pred_cv = va_cv.predict_proba(np.asarray(X_test))
         y_pred = va_cv.predict(np.array(X_test), one_hot=False)
-        acc_list.append(accuracy_score(y_test, y_pred))
+        acc_list.append(f1_score(y_test, y_pred, average="weighted"))
         log_loss_list.append(log_loss(y_test, p_pred_cv))
         brier_loss_list.append(brier_score_loss(y_test, p_pred_cv))
         ece_list.append(cal.get_calibration_error(p_pred_cv, y_test))
@@ -286,45 +295,95 @@ def _(clfs, pd, run_multiclass_comparison):
 
 @app.cell
 def _(results_acc, results_brier, results_ece, results_log):
-    results_acc.set_index("Classifier", inplace=True)
-    print("Accuracy Results:")
-    print(results_acc.round(3))
+    def df_to_markdown_table(df, higher_is_better=True):
+        # Convert to float and find best indices
+        df_float = df.select_dtypes(include=["number"])
+        if higher_is_better:
+            best_indices = df_float.idxmax(axis=1)
+        else:
+            best_indices = df_float.idxmin(axis=1)
 
-    results_brier.set_index("Classifier", inplace=True)
-    print("\nBrier Loss Results:")
-    print(results_brier.round(4))
+        # Round and convert to string
+        formatted_df = df_float.round(4).astype(str)
 
-    results_log.set_index("Classifier", inplace=True)
-    print("\nLog Loss Results:")
-    print(results_log.round(4))
+        # Bold the best values
+        for idx, best_col in enumerate(best_indices):
+            formatted_df.iloc[idx, formatted_df.columns.get_loc(best_col)] = (
+                f"**{formatted_df.iloc[idx, formatted_df.columns.get_loc(best_col)]}**"
+            )
 
-    results_ece.set_index("Classifier", inplace=True)
-    print("\nECE Results:")
-    print(results_ece.round(4))
+        # Generate markdown table
+        headers = [""] + list(formatted_df.columns)
+        lines = ["| " + " | ".join(headers) + " |"]
+        lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
 
-    print("\nMean Accuracy across methods:")
-    print(results_acc.mean())
+        for idx, row in formatted_df.iterrows():
+            line = "| " + str(idx) + " | " + " | ".join(row.values) + " |"
+            lines.append(line)
 
-    print("\nMean rank of Accuracy across classifiers:")
-    print(results_acc.rank(axis=1, ascending=False).mean())
+        return "\n".join(lines)
 
-    print("\nMean Brier Loss across methods:")
-    print(results_brier.mean())
+    def get_best_metric(df, metric_name, higher_is_better=True):
+        values = df.mean()
+        ranks = df.rank(axis=1, ascending=not higher_is_better).mean()
+        best_value = values.argmax() if higher_is_better else values.argmin()
+        best_rank = ranks.argmin()
+        formatted_values = values.round(4).astype(str)
+        formatted_values[values.index[best_value]] = (
+            f"**{formatted_values[values.index[best_value]]}**"
+        )
+        formatted_ranks = ranks.round(2).astype(str)
+        formatted_ranks[ranks.index[best_rank]] = (
+            f"**{formatted_ranks[ranks.index[best_rank]]}**"
+        )
 
-    print("\nMean rank of Brier Loss across classifiers:")
-    print(results_brier.rank(axis=1).mean())
+        # Create markdown table
+        headers = ["Method", "Value", "Rank"]
+        lines = ["| " + " | ".join(headers) + " |"]
+        lines.append("| --- | --- | --- |")
 
-    print("\nMean Log Loss across methods:")
-    print(results_log.mean())
+        for method, val, rank in zip(values.index, formatted_values, formatted_ranks):
+            lines.append(f"| {method} | {val} | {rank} |")
 
-    print("\nMean rank of Log Loss across classifiers:")
-    print(results_log.rank(axis=1).mean())
+        return f"### {metric_name} :\n" + "\n".join(lines)
 
-    print("\nMean ECE across methods:")
-    print(results_ece.mean())
+    if "Classifier" in results_acc.columns:
+        results_acc.set_index("Classifier", inplace=True)
+    if "Classifier" in results_brier.columns:
+        results_brier.set_index("Classifier", inplace=True)
+    if "Classifier" in results_ece.columns:
+        results_ece.set_index("Classifier", inplace=True)
+    if "Classifier" in results_log.columns:
+        results_log.set_index("Classifier", inplace=True)
+    return df_to_markdown_table, get_best_metric
 
-    print("\nMean rank of ECE across classifiers:")
-    print(results_ece.rank(axis=1).mean())
+
+@app.cell
+def _(
+    df_to_markdown_table,
+    get_best_metric,
+    mo,
+    results_acc,
+    results_brier,
+    results_ece,
+    results_log,
+):
+    # Combine all markdown into a single mo.md() call
+    mo.md(
+        "## Accuracy Results\n"
+        + df_to_markdown_table(results_acc, higher_is_better=True)
+        + "\n\n## Brier Loss Results\n"
+        + df_to_markdown_table(results_brier, higher_is_better=False)
+        + "\n\n## Log Loss Results\n"
+        + df_to_markdown_table(results_log, higher_is_better=False)
+        + "\n\n## ECE Results\n"
+        + df_to_markdown_table(results_ece, higher_is_better=False)
+        + "\n\n\n## Summary Statistics\n"
+        + f"{get_best_metric(results_acc, 'Accuracy', higher_is_better=True)}\n\n"
+        + f"{get_best_metric(results_brier, 'Brier Loss', higher_is_better=False)}\n\n"
+        + f"{get_best_metric(results_log, 'Log Loss', higher_is_better=False)}\n\n"
+        + f"{get_best_metric(results_ece, 'ECE', higher_is_better=False)}"
+    )
 
     return
 

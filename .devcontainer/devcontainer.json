@@ -1,0 +1,24 @@
+{
+    "name": "Marimo Codespace",
+    "image": "mcr.microsoft.com/devcontainers/python:3.13",
+    "features": {
+      "ghcr.io/devcontainers/features/uv:1": {}
+    },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "marimo-ai.marimo-vscode",
+          "ms-python.python",
+          "ms-toolsai.jupyter"
+        ]
+      }
+    },
+    "portsAttributes": {
+      "2718": {
+        "label": "Marimo",
+        "onAutoForward": "openBrowser"
+      }
+    },
+    "postStartCommand": "./start-marimo.sh",
+    "remoteUser": "vscode"
+  }
