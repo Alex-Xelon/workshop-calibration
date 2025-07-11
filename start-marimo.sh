@@ -1,12 +1,14 @@
 #!/bin/bash
 set -e
 
-echo "📦 Installing uv..."
-curl -LsSf https://astral.sh/uv/install.sh | sh
+echo "Installing uv into ~/.local/bin..."
+curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --bin-dir ~/.local/bin
 
-echo "📦 Installing Python packages with uv..."
-/root/.cargo/bin/uv pip install --system --quiet
-/root/.cargo/bin/uv uv sync
+export PATH="$HOME/.local/bin:$PATH"
+
+echo "Installing Python packages with uv..."
+uv pip install --system --quiet
+uv sync
 
 source .venv/bin/activate
 

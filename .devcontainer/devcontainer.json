@@ -16,6 +16,6 @@
         "onAutoForward": "openBrowser"
       }
     },
-    "postStartCommand": "./start-marimo.sh",
+    "postStartCommand": "chmod +x ./start-marimo.sh && ./start-marimo.sh",
     "remoteUser": "vscode"
   }
