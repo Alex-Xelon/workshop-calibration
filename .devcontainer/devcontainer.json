@@ -1,9 +1,6 @@
 {
     "name": "Marimo Codespace",
     "image": "mcr.microsoft.com/devcontainers/python:3.13",
-    "features": {
-      "ghcr.io/devcontainers/features/uv:1": {}
-    },
     "customizations": {
       "vscode": {
         "extensions": [
