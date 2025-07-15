@@ -6,8 +6,7 @@
         "extensions": [
           "marimo-ai.marimo-vscode",
           "ms-python.python",
-          "ms-toolsai.jupyter",
-          "yzhang.markdown-all-in-one"
+          "ms-toolsai.jupyter"
         ]
       }
     },
@@ -18,8 +17,7 @@
       }
     },
     "features": {
-      "ghcr.io/devcontainers/features/python:1": {},
-      "ghcr.io/devcontainers/features/node:1": {}
+      "ghcr.io/devcontainers/features/python:1": {}
     },
     "postStartCommand": "chmod +x ./start-marimo.sh && ./start-marimo.sh 2>&1",
     "remoteUser": "vscode"
