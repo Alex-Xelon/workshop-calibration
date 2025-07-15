@@ -1,16 +1,18 @@
 #!/bin/bash
 set -e
 
-# Vérifier si uv est installé
-if ! command -v uv &> /dev/null; then
-    echo "Installing uv into ~/.cargo/bin..."
-    curl -LsSf https://astral.sh/uv/install.sh | bash
-fi
+echo "Installing uv into ~/.local/bin..."
+
+# Créer un dossier pour uv si besoin
+mkdir -p ~/.local/bin
+
+# Installer uv dans ~/.local/bin
+curl -LsSf https://astral.sh/uv/install.sh | bash
 
 # Ajouter uv au PATH pour cette session + futures
-export PATH="$HOME/.cargo/bin:$PATH"
-if ! grep -q 'export PATH="$HOME/.cargo/bin:$PATH"' ~/.bashrc; then
-    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
+export PATH="$HOME/.local/bin:$PATH"
+if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' ~/.bashrc; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 fi
 
 # Éviter les warnings liés aux hardlinks
