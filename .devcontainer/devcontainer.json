@@ -4,7 +4,7 @@
     "customizations": {
       "vscode": {
         "extensions": [
-          "marimo-ai.marimo-vscode",
+          "marimo-team.vscode-marimo",
           "ms-python.python",
           "ms-toolsai.jupyter"
         ]
