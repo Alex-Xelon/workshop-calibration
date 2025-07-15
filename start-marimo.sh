@@ -13,15 +13,19 @@ curl -LsSf https://astral.sh/uv/install.sh | bash
 export PATH="$HOME/.cargo/bin:$PATH"
 
 echo "Installing Python packages with uv..."
-uv pip install --system --quiet || echo "uv pip install failed (maybe no requirements)"
-uv sync || echo "uv sync failed (maybe no pyproject.toml)"
+if [ -f "pyproject.toml" ]; then
+    uv sync || echo "uv sync failed"
+else
+    echo "No pyproject.toml found, skipping sync"
+fi
 
 # Créer et activer un venv si nécessaire
 uv venv
 source .venv/bin/activate
 
-echo "Installation des dépendances..."
-2>&1 | grep -v "Error sending telemetry"
-
-echo "Launching Marimo..."
-exec marimo run src/calibration_test/simple_class_calibration.marimo --port 2718 --host 0.0.0.0
+# Ouvrir le README.md s'il existe
+if [ -f "README.md" ]; then
+    code README.md
+else
+    echo "No README.md found"
+fi
