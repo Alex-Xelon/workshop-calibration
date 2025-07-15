@@ -22,10 +22,3 @@ fi
 # Créer et activer un venv si nécessaire
 uv venv
 source .venv/bin/activate
-
-# Ouvrir le README.md s'il existe
-if [ -f "README.md" ]; then
-    code README.md
-else
-    echo "No README.md found"
-fi
