@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.14.10"
+__generated_with = "0.14.11"
 app = marimo.App(width="medium")
 
 
@@ -9,7 +9,6 @@ def _():
     import marimo as mo
     import pandas as pd
     import numpy as np
-    import random
     from scipy.io import arff
     from sklearn.metrics import log_loss, brier_score_loss, f1_score
     from sklearn.model_selection import train_test_split
@@ -42,7 +41,6 @@ def _():
         mo,
         np,
         pd,
-        random,
         train_test_split,
     )
 
@@ -355,36 +353,28 @@ def _(results_acc, results_brier, results_ece, results_log):
         results_ece.set_index("Classifier", inplace=True)
     if "Classifier" in results_log.columns:
         results_log.set_index("Classifier", inplace=True)
-    return df_to_markdown_table, get_best_metric
+    return
 
 
 @app.cell
-def _(
-    df_to_markdown_table,
-    get_best_metric,
-    mo,
-    results_acc,
-    results_brier,
-    results_ece,
-    results_log,
-):
-    # Combine all markdown into a single mo.md() call
+def _(mo):
     mo.md(
-        "## Accuracy Results\n"
-        + df_to_markdown_table(results_acc, higher_is_better=True)
-        + "\n\n## Brier Loss Results\n"
-        + df_to_markdown_table(results_brier, higher_is_better=False)
-        + "\n\n## Log Loss Results\n"
-        + df_to_markdown_table(results_log, higher_is_better=False)
-        + "\n\n## ECE Results\n"
-        + df_to_markdown_table(results_ece, higher_is_better=False)
-        + "\n\n\n## Summary Statistics\n"
-        + f"{get_best_metric(results_acc, 'Accuracy', higher_is_better=True)}\n\n"
-        + f"{get_best_metric(results_brier, 'Brier Loss', higher_is_better=False)}\n\n"
-        + f"{get_best_metric(results_log, 'Log Loss', higher_is_better=False)}\n\n"
-        + f"{get_best_metric(results_ece, 'ECE', higher_is_better=False)}"
+        r"""
+        ## Accuracy Results\n"
+            + df_to_markdown_table(results_acc, higher_is_better=True)
+            + "\n\n## Brier Loss Results\n"
+            + df_to_markdown_table(results_brier, higher_is_better=False)
+            + "\n\n## Log Loss Results\n"
+            + df_to_markdown_table(results_log, higher_is_better=False)
+            + "\n\n## ECE Results\n"
+            + df_to_markdown_table(results_ece, higher_is_better=False)
+            + "\n\n\n## Summary Statistics\n"
+            + f"{get_best_metric(results_acc, 'Accuracy', higher_is_better=True)}\n\n"
+            + f"{get_best_metric(results_brier, 'Brier Loss', higher_is_better=False)}\n\n"
+            + f"{get_best_metric(results_log, 'Log Loss', higher_is_better=False)}\n\n"
+            + f"{get_best_metric(results_ece, 'ECE', higher_is_better=False)}
+        """
     )
-
     return
 
 
