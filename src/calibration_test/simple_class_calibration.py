@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.14.10"
+__generated_with = "0.14.11"
 app = marimo.App(width="medium")
 
 
@@ -22,6 +22,7 @@ def _():
     from sklearn.preprocessing import StandardScaler
     from sklearn.utils import resample
     import gc
+    from scipy.io import arff
     import warnings
 
     warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -33,6 +34,7 @@ def _():
         RandomForestClassifier,
         StandardScaler,
         VennAbersCalibrator,
+        arff,
         brier_score_loss,
         cal,
         calibration_curve,
@@ -49,27 +51,14 @@ def _():
 
 
 @app.cell
-def _(StandardScaler, pd, resample, train_test_split):
+def _(StandardScaler, arff, pd, resample, train_test_split):
     # Étape 1 : Génération d'un jeu de données binaire
     print("Génération d'un jeu de données synthétique")
 
-    random_state = 28  # 40
+    random_state = 28
 
-    df = pd.read_csv(
-        "hf://datasets/mihaicata/diabetes/all_data_processed.tsv", sep="\t"
-    )
-    inputs_expanded = (
-        df["inputs"]
-        .astype(str)
-        .str.replace(" ", "")
-        .str.replace("[", "")
-        .str.replace("]", "")
-        .str.split(",", expand=True)
-    )
-
-    inputs_expanded.columns = [f"input_{i}" for i in range(inputs_expanded.shape[1])]
-    inputs_expanded = inputs_expanded.dropna(axis=1)
-    df = pd.concat([inputs_expanded, df["label"]], axis=1)
+    data = arff.loadarff("data/dataset_simpleclass.arff")
+    df = pd.DataFrame(data[0]).rename(columns={"Outcome": "label"})
 
     # Équilibrage des classes par sur-échantillonnage
     majority = df[df.label == df.label.value_counts().idxmax()]
@@ -81,7 +70,7 @@ def _(StandardScaler, pd, resample, train_test_split):
     df = pd.concat([majority, minority_upsampled])
 
     X = df.drop(columns=["label"])
-    y = df["label"]
+    y = df["label"].astype(int).values
 
     df = df.sample(frac=1, random_state=42).reset_index(drop=True)
 
