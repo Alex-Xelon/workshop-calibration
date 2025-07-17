@@ -21,11 +21,10 @@ def _():
     import calibration as cal
     from sklearn.preprocessing import StandardScaler
     from sklearn.utils import resample
-    import gc
     from scipy.io import arff
     import warnings
 
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    warnings.filterwarnings("ignore")
     return (
         CalibratedClassifierCV,
         FrozenEstimator,
@@ -39,7 +38,6 @@ def _():
         cal,
         calibration_curve,
         f1_score,
-        gc,
         log_loss,
         np,
         pd,
@@ -56,34 +54,35 @@ def _(StandardScaler, arff, pd, resample, train_test_split):
     print("Génération d'un jeu de données synthétique")
 
     random_state = 28
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.width", None)
 
     data = arff.loadarff("data/dataset_simpleclass.arff")
-    df = pd.DataFrame(data[0]).rename(columns={"Outcome": "label"})
+    df = pd.DataFrame(data[0])
+    print(df.head(10))
 
     # Équilibrage des classes par sur-échantillonnage
     majority = df[df.label == df.label.value_counts().idxmax()]
     minority = df[df.label == df.label.value_counts().idxmin()]
     minority_upsampled = resample(
-        minority, replace=True, n_samples=len(majority), random_state=42
+        minority,
+        replace=True,
+        n_samples=len(majority),
+        random_state=random_state,
     )
 
     df = pd.concat([majority, minority_upsampled])
+    df = df.sample(frac=1, random_state=random_state).reset_index(drop=True)
 
     X = df.drop(columns=["label"])
     y = df["label"].astype(int).values
-
-    df = df.sample(frac=1, random_state=42).reset_index(drop=True)
-
-    pd.set_option("display.max_rows", None)
-    pd.set_option("display.max_columns", None)
-    pd.set_option("display.width", None)
-    print(df.head(10))
 
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, shuffle=True, test_size=0.99, random_state=random_state, stratify=y
+        X, y, shuffle=True, test_size=0.95, random_state=random_state, stratify=y
     )
 
     X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
@@ -255,7 +254,6 @@ def _(
 def _(calibration_curve, pd, plt, results, y_test):
     # Step 5: Plot calibration curves
     def plot():
-        print("\n Génération des courbes de calibration 1/2")
         plt.figure(figsize=(8, 6))
         for name in [
             "Random Forest",
@@ -276,7 +274,6 @@ def _(calibration_curve, pd, plt, results, y_test):
         plt.tight_layout()
         plt.show()
 
-        print("\n Génération des courbes de calibration 2/2")
         plt.figure(figsize=(8, 6))
         for name in [
             "XGBoost",
@@ -332,7 +329,6 @@ def _(
     brier_score_loss,
     cal,
     f1_score,
-    gc,
     log_loss,
     np,
     pd,
@@ -363,7 +359,6 @@ def _(
         results["brier"].append(brier_score_loss(y_test, clf_prob))
         results["log loss"].append(log_loss(y_test, clf_prob))
         results["ece"].append(cal.get_calibration_error(clf_prob, y_test))
-        print("Uncalibrated model ✅")
 
         # IVAP
         va = VennAbersCalibrator(
@@ -377,7 +372,6 @@ def _(
         results["brier"].append(brier_score_loss(y_test, va_inductive_prob))
         results["log loss"].append(log_loss(y_test, va_inductive_prob))
         results["ece"].append(cal.get_calibration_error(va_inductive_prob, y_test))
-        print("IVAP model ✅")
 
         # CVAP
         va = VennAbersCalibrator(estimator=GaussianNB(), inductive=False, n_splits=2)
@@ -387,7 +381,6 @@ def _(
         results["brier"].append(brier_score_loss(y_test, va_cv_prob))
         results["log loss"].append(log_loss(y_test, va_cv_prob))
         results["ece"].append(cal.get_calibration_error(va_cv_prob, y_test))
-        print("CVAP model ✅")
 
         # Prefit
         X_train_proper, X_cal, y_train_proper, y_cal = train_test_split(
@@ -405,7 +398,6 @@ def _(
         results["brier"].append(brier_score_loss(y_test, va_prefit_prob))
         results["log loss"].append(log_loss(y_test, va_prefit_prob))
         results["ece"].append(cal.get_calibration_error(va_prefit_prob, y_test))
-        print("Prefit model ✅")
 
         # Isotonic (cv=5)
         iso = CalibratedClassifierCV(GaussianNB(), method="isotonic", cv=5)
@@ -415,7 +407,6 @@ def _(
         results["brier"].append(brier_score_loss(y_test, iso_prob))
         results["log loss"].append(log_loss(y_test, iso_prob))
         results["ece"].append(cal.get_calibration_error(iso_prob, y_test))
-        print("Isotonic model ✅")
 
         # Isotonic prefit
         clf.fit(X_train_proper, y_train_proper)
@@ -426,7 +417,6 @@ def _(
         results["brier"].append(brier_score_loss(y_test, iso_prefit_prob))
         results["log loss"].append(log_loss(y_test, iso_prefit_prob))
         results["ece"].append(cal.get_calibration_error(iso_prefit_prob, y_test))
-        print("Isotonic prefit model ✅")
 
         # Sigmoid (cv=5)
         sig = CalibratedClassifierCV(GaussianNB(), method="sigmoid", cv=5)
@@ -436,7 +426,6 @@ def _(
         results["brier"].append(brier_score_loss(y_test, sig_prob))
         results["log loss"].append(log_loss(y_test, sig_prob))
         results["ece"].append(cal.get_calibration_error(sig_prob, y_test))
-        print("Sigmoid model ✅")
 
         # Sigmoid prefit
         clf.fit(X_train_proper, y_train_proper)
@@ -447,13 +436,13 @@ def _(
         results["brier"].append(brier_score_loss(y_test, sig_prefit_prob))
         results["log loss"].append(log_loss(y_test, sig_prefit_prob))
         results["ece"].append(cal.get_calibration_error(sig_prefit_prob, y_test))
-        print("Sigmoid prefit model ✅ \n")
 
-        gc.collect()
-
-        # Display results
+        print(
+            "Summary of the results for the different calibration methods (base model: GaussianNB):"
+        )
         df_loss = pd.DataFrame(results, index=methods).T.round(3)
-        return print(df_loss)
+        print(df_loss)
+        return df_loss
 
     _()
     return
