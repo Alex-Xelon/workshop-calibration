@@ -1,13 +1,14 @@
 # Trustable IA Workshop – Enhancing Calibration for Reliable AI Predictions
 
+
+
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Python](https://img.shields.io/badge/python-3.13+-blue)
-![Marimo Notebook](https://img.shields.io/badge/marimo-notebook-blue)
-![scikit-learn](https://img.shields.io/badge/library-scikit--learn-blue)
-![Marimo](https://img.shields.io/badge/marimo-0.2.11-blue)\
+![Jupyter Notebook](https://img.shields.io/badge/jupyter-orange?style=flat&logo=jupyter&logoColor=white)
+![Scikit-Learn](https://img.shields.io/badge/scikit--learn-f3f3f3?style=flat&logo=scikit-learn&logoColor=orange)\
 ![GitHub repo size](https://img.shields.io/github/repo-size/alexlemiere/calibration-test)
 ![Last Commit](https://img.shields.io/github/last-commit/alexlemiere/calibration-test)
-![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
+![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-43a047.svg)
 
 
 Welcome to this hands-on workshop on **AI Model Calibration**, a fundamental aspect of developing reliable and trustworthy machine learning systems. Through practical exercises and real-world examples, you'll master the art of calibrating your models to ensure their probability predictions accurately reflect real-world outcomes.

@@ -30,8 +30,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # %%
-# Étape 1 : Génération d'un jeu de données binaire
-print("Génération d'un jeu de données synthétique")
+# Step 1 : Load the dataset
+print("Loading the dataset")
 
 random_state = 28
 pd.set_option("display.max_rows", None)
@@ -40,9 +40,10 @@ pd.set_option("display.width", None)
 
 data = arff.loadarff("../../data/dataset_simpleclass.arff")
 df = pd.DataFrame(data[0])
+
 print(df.head(10))
 
-# Équilibrage des classes par sur-échantillonnage
+# Balancing the classes by oversampling
 majority = df[df.label == df.label.value_counts().idxmax()]
 minority = df[df.label == df.label.value_counts().idxmin()]
 minority_upsampled = resample(
@@ -62,7 +63,12 @@ scaler = StandardScaler()
 X = scaler.fit_transform(X)
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, shuffle=True, test_size=0.95, random_state=random_state, stratify=y
+    X,
+    y,
+    shuffle=True,
+    test_size=0.95,
+    random_state=random_state,
+    stratify=y,
 )
 
 X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
@@ -76,32 +82,29 @@ X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
 
 
 # %%
-def define_model():
-    # Étape 2 : Définir les modèles à tester
-    print("Définition des modèles à tester")
-    models = {
-        "Logistic Regression": LogisticRegression(
-            max_iter=5000,
-            random_state=random_state,
-        ),
-        "Random Forest": RandomForestClassifier(
-            n_estimators=10, random_state=random_state
-        ),
-        "XGBoost": xgb.XGBClassifier(
-            tree_method="hist",
-            random_state=random_state,
-        ),
-    }
-    for name in models.keys():
-        print(f"- {name}")
-    results = {}
-    return models, results
+# Step 2 : Define the models to test
+print("Models to test")
+models = {
+    "Logistic Regression": LogisticRegression(
+        max_iter=5000,
+        random_state=random_state,
+    ),
+    "Random Forest": RandomForestClassifier(
+        n_estimators=10,
+        random_state=random_state,
+    ),
+    "XGBoost": xgb.XGBClassifier(
+        tree_method="hist",
+        random_state=random_state,
+    ),
+}
+results = {}
 
-
-models, results = define_model()
+for name_model in models.keys():
+    print(f"- {name_model}")
 
 # %%
-# Étape 3 : Évaluer chaque modèle sans calibration
+# Step 3 : Evaluate each model without calibration
 for name, model in models.items():
     print(f"\n Entraînement du modèle : {name}")
     model.fit(X_train, y_train)
@@ -125,7 +128,7 @@ for name, model in models.items():
 
 
 # %%
-# Étape 4 : Calibration explicite avec Platt(sigmoid) et Isotonic
+# Step 4 : Explicit calibration with Platt (sigmoid), Isotonic and Venn-ABERS
 def calibration():
     for name in models.keys():
         for method in ["sigmoid", "isotonic"]:
@@ -252,18 +255,19 @@ plot()
 
 
 # %%
-def _():
+# Step 6 : Compare the different calibration methods
+def compare_methods():
     # Prepare results storage
     metrics = ["accuracy", "brier", "log loss", "ece"]
     methods = [
         "Uncalibrated",
-        "IVAP",
-        "CVAP",
-        "Prefit",
         "Isotonic",
         "Isotonic prefit",
         "Sigmoid",
         "Sigmoid prefit",
+        "Prefit Venn-Abers",
+        "IVAP",
+        "CVAP",
     ]
     results = {m: [] for m in metrics}
 
@@ -276,45 +280,6 @@ def _():
     results["log loss"].append(log_loss(y_test, clf_prob))
     results["ece"].append(cal.get_calibration_error(clf_prob, y_test))
 
-    # IVAP
-    va = VennAbersCalibrator(
-        estimator=GaussianNB(),
-        inductive=True,
-        cal_size=0.2,
-    )
-    va.fit(X_train, y_train)
-    va_inductive_prob = va.predict_proba(X_test)[:, 1]
-    results["accuracy"].append(f1_score(y_test, va.predict(X_test)[:, 1]))
-    results["brier"].append(brier_score_loss(y_test, va_inductive_prob))
-    results["log loss"].append(log_loss(y_test, va_inductive_prob))
-    results["ece"].append(cal.get_calibration_error(va_inductive_prob, y_test))
-
-    # CVAP
-    va = VennAbersCalibrator(estimator=GaussianNB(), inductive=False, n_splits=2)
-    va.fit(X_train, y_train)
-    va_cv_prob = va.predict_proba(X_test)[:, 1]
-    results["accuracy"].append(f1_score(y_test, va.predict(X_test)[:, 1]))
-    results["brier"].append(brier_score_loss(y_test, va_cv_prob))
-    results["log loss"].append(log_loss(y_test, va_cv_prob))
-    results["ece"].append(cal.get_calibration_error(va_cv_prob, y_test))
-
-    # Prefit
-    X_train_proper, X_cal, y_train_proper, y_cal = train_test_split(
-        X_train, y_train, test_size=0.2, shuffle=False
-    )
-    clf.fit(X_train_proper, y_train_proper)
-    p_cal = clf.predict_proba(X_cal)
-    p_test = clf.predict_proba(X_test)
-    va = VennAbersCalibrator()
-    va_prefit_prob = va.predict_proba(
-        p_cal=p_cal, y_cal=np.array(y_cal), p_test=p_test
-    )[:, 1]
-    y_pred = va.predict(p_cal=p_cal, y_cal=np.array(y_cal), p_test=p_test)[:, 1]
-    results["accuracy"].append(f1_score(y_test, y_pred))
-    results["brier"].append(brier_score_loss(y_test, va_prefit_prob))
-    results["log loss"].append(log_loss(y_test, va_prefit_prob))
-    results["ece"].append(cal.get_calibration_error(va_prefit_prob, y_test))
-
     # Isotonic (cv=5)
     iso = CalibratedClassifierCV(GaussianNB(), method="isotonic", cv=5)
     iso.fit(X_train, y_train)
@@ -325,7 +290,7 @@ def _():
     results["ece"].append(cal.get_calibration_error(iso_prob, y_test))
 
     # Isotonic prefit
-    clf.fit(X_train_proper, y_train_proper)
+    clf.fit(X_proper_train, y_proper_train)
     iso_prefit = CalibratedClassifierCV(FrozenEstimator(clf), method="isotonic")
     iso_prefit.fit(X_cal, y_cal)
     iso_prefit_prob = iso_prefit.predict_proba(X_test)[:, 1]
@@ -344,7 +309,7 @@ def _():
     results["ece"].append(cal.get_calibration_error(sig_prob, y_test))
 
     # Sigmoid prefit
-    clf.fit(X_train_proper, y_train_proper)
+    clf.fit(X_proper_train, y_proper_train)
     sig_prefit = CalibratedClassifierCV(FrozenEstimator(clf), method="sigmoid")
     sig_prefit.fit(X_cal, y_cal)
     sig_prefit_prob = sig_prefit.predict_proba(X_test)[:, 1]
@@ -353,6 +318,46 @@ def _():
     results["log loss"].append(log_loss(y_test, sig_prefit_prob))
     results["ece"].append(cal.get_calibration_error(sig_prefit_prob, y_test))
 
+    # Prefit
+    clf.fit(X_proper_train, y_proper_train)
+    p_cal = clf.predict_proba(X_cal)
+    p_test = clf.predict_proba(X_test)
+    va = VennAbersCalibrator()
+    va_prefit_prob = va.predict_proba(
+        p_cal=p_cal, y_cal=np.array(y_cal), p_test=p_test
+    )[:, 1]
+    y_pred = va.predict(p_cal=p_cal, y_cal=np.array(y_cal), p_test=p_test)[:, 1]
+    results["accuracy"].append(f1_score(y_test, y_pred))
+    results["brier"].append(brier_score_loss(y_test, va_prefit_prob))
+    results["log loss"].append(log_loss(y_test, va_prefit_prob))
+    results["ece"].append(cal.get_calibration_error(va_prefit_prob, y_test))
+
+    # IVAP
+    va = VennAbersCalibrator(
+        estimator=GaussianNB(),
+        inductive=True,
+        cal_size=0.2,
+    )
+    va.fit(X_train, y_train)
+    va_inductive_prob = va.predict_proba(X_test)[:, 1]
+    results["accuracy"].append(f1_score(y_test, va.predict(X_test)[:, 1]))
+    results["brier"].append(brier_score_loss(y_test, va_inductive_prob))
+    results["log loss"].append(log_loss(y_test, va_inductive_prob))
+    results["ece"].append(cal.get_calibration_error(va_inductive_prob, y_test))
+
+    # CVAP
+    va = VennAbersCalibrator(
+        estimator=GaussianNB(),
+        inductive=False,
+        n_splits=2,
+    )
+    va.fit(X_train, y_train)
+    va_cv_prob = va.predict_proba(X_test)[:, 1]
+    results["accuracy"].append(f1_score(y_test, va.predict(X_test)[:, 1]))
+    results["brier"].append(brier_score_loss(y_test, va_cv_prob))
+    results["log loss"].append(log_loss(y_test, va_cv_prob))
+    results["ece"].append(cal.get_calibration_error(va_cv_prob, y_test))
+
     print(
         "Summary of the results for the different calibration methods (base model: GaussianNB):"
     )
@@ -360,4 +365,6 @@ def _():
     return df_loss
 
 
-_()
+compare_methods()
+
+# %%

@@ -23,10 +23,10 @@ import calibration as cal
 
 
 # %%
-# Load and prepare the Water Quality dataset for multi-label classification
-# The dataset contains water quality measurements and binary indicators for 14 different quality parameters
+# Step 1 : Load the dataset
 
 random_state = 6
+
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
@@ -80,7 +80,8 @@ X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
 )
 
 # %%
-# Multi-output classifier non calibrated
+# Step 2 : Multi-output classifier non calibrated
+
 base_clf = RandomForestClassifier(random_state=random_state)
 multi_clf = MultiOutputClassifier(base_clf)
 multi_clf.fit(X_train, y_train)
@@ -88,7 +89,8 @@ pred_probs_uncalibrated = multi_clf.predict_proba(X_test)
 pred_y_uncalibrated = multi_clf.predict(X_test)
 
 # %%
-# Calibration by output
+# Step 3 : Model calibration
+
 calibrated_clfs = []
 pred_probs_calibrated = []
 pred_y_calibrated = []
@@ -107,7 +109,8 @@ pred_y_uncalibrated_matrix = np.column_stack(pred_y_uncalibrated).T
 pred_y_calibrated_matrix = np.column_stack(pred_y_calibrated)
 
 # %%
-# Compute Brier scores
+# Step 4 : Compute metrics
+
 brier_scores_uncalibrated = [
     brier_score_loss(y_test.iloc[:, i], pred_probs_uncalibrated_matrix[:, i])
     for i in range(y.shape[1])
@@ -161,7 +164,8 @@ ece_score_df = pd.DataFrame(
 )
 
 # %%
-# Visualisation
+# Step 5 : Visualisation
+
 # Plot Accuracy per label before and after calibration
 plt.figure(figsize=(10, 5))
 accuracy_long = accuracy_score_df.melt(
