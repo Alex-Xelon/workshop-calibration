@@ -13,6 +13,7 @@ dependencies = [
     "fsspec>=2025.5.1",
     "huggingface-hub>=0.33.2",
     "ipykernel>=6.29.5",
+    "jupytext>=1.17.2",
     "kagglehub>=0.3.12",
     "marimo[lsp,recommended]>=0.14.11",
     "matplotlib>=3.10.3",
