@@ -9,6 +9,7 @@
 # ---
 
 # %%
+# Step 0 : Import Libraries
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -23,7 +24,7 @@ import calibration as cal
 
 
 # %%
-# Part 1 : Data Preparation and Splitting
+# Step 1 : Data loading
 
 random_state = 6
 
@@ -31,13 +32,15 @@ pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
 
-data = arff.loadarff("../../data/dataset_multilabel.arff")
+data = arff.loadarff("../../data/___")  # TODO
 df = pd.DataFrame(data[0])
 
-print(df.head())
+print(___)  # TODO
 
-numeric_cols = df.select_dtypes(include=[np.number]).columns
-X = df[numeric_cols]
+# %%
+# Step 2 : Data Preparation
+numeric_cols = df.___(include=[np.number]).___  # TODO
+X = df[___]  # TODO
 
 label_cols = [
     "25400",
@@ -55,61 +58,67 @@ label_cols = [
     "59300",
     "37880",
 ]
-y = df[label_cols].astype(int)
+y = df[___].astype(___)  # TODO
+
+print(X.head())
 print(y.head())
 
-label_counts = y.sum()
-print("\nDistribution of labels:")
-print(label_counts.to_string())
-print(f"Total number of unique labels: {len(label_counts)}")
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.90,
-    shuffle=False,
-    random_state=random_state,
+# %%
+# Step 3 : Data Splitting
+X_train, X_test, y_train, y_test = ___(  # TODO
+    ___,  # TODO
+    ___,  # TODO
+    test_size=___,  # TODO
+    shuffle=___,  # TODO
+    random_state=___,  # TODO
 )
 
-X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
-    X_train,
-    y_train,
-    test_size=0.2,
-    shuffle=False,
-    random_state=random_state,
+X_proper_train, X_cal, y_proper_train, y_cal = ___(  # TODO
+    ___,  # TODO
+    ___,  # TODO
+    ___,  # TODO
+    ___,  # TODO
+    ___,  # TODO
 )
 
+print(X_train.head())
+print(y_train.head())
+print(X_test.head())
+print(y_test.head())
+print(X_proper_train.head())
+print(y_proper_train.head())
+print(X_cal.head())
+print(y_cal.head())
+
 # %%
-# Part 2 : Multi-output classifier non calibrated
-
-base_clf = RandomForestClassifier(random_state=random_state)
-multi_clf = MultiOutputClassifier(base_clf)
-multi_clf.fit(X_train, y_train)
-pred_probs_uncalibrated = multi_clf.predict_proba(X_test)
-pred_y_uncalibrated = multi_clf.predict(X_test)
+# Step 4 : Multi-output classifier non calibrated
+base_clf = ___(random_state=___)  # TODO
+multi_clf = ___(base_clf)  # TODO
+multi_clf.___(__, ___)  # TODO
+pred_probs_uncalibrated = multi_clf.___(___)  # TODO
+pred_y_uncalibrated = multi_clf.___(___)  # TODO
 
 # %%
-# Part 3 : Model calibration
-
+# Step 5 : Model calibration
 calibrated_clfs = []
 pred_probs_calibrated = []
 pred_y_calibrated = []
 for i in range(y.shape[1]):
-    clf = CalibratedClassifierCV(base_clf, method="sigmoid", cv=10)
-    clf.fit(X_train, y_train.iloc[:, i])
-    calibrated_clfs.append(clf)
-    pred_probs_calibrated.append(clf.predict_proba(X_test)[:, 1])
-    pred_y_calibrated.append(clf.predict(X_test))
+    clf = ___(___, method="___", cv=___)  # TODO
+    clf.___(__, ___.iloc[:, i])  # TODO
+    calibrated_clfs.append()  # TODO
+    pred_probs_calibrated.append(clf.___(__)[:, 1])  # TODO
+    pred_y_calibrated.append(clf.___(__))  # TODO
 
 # Conversion to numpy matrix
-pred_probs_uncalibrated_matrix = np.vstack([p[:, 1] for p in pred_probs_uncalibrated]).T
-pred_probs_calibrated_matrix = np.vstack(pred_probs_calibrated).T
+pred_probs_uncalibrated_matrix = np.vstack([p[:, 1] for p in ___]).T  # TODO
+pred_probs_calibrated_matrix = np.vstack(___).T  # TODO
 
-pred_y_uncalibrated_matrix = np.column_stack(pred_y_uncalibrated).T
-pred_y_calibrated_matrix = np.column_stack(pred_y_calibrated)
+pred_y_uncalibrated_matrix = np.column_stack(___).T  # TODO
+pred_y_calibrated_matrix = np.column_stack(___)  # TODO
 
 # %%
-# Part 4 : Compute metrics
+# Step 6 : Compute metrics
 
 brier_scores_uncalibrated = [
     brier_score_loss(y_test.iloc[:, i], pred_probs_uncalibrated_matrix[:, i])
@@ -164,7 +173,7 @@ ece_score_df = pd.DataFrame(
 )
 
 # %%
-# Part 5 : Visualisation
+# Step 7 : Visualisation
 
 # Plot Accuracy per label before and after calibration
 plt.figure(figsize=(10, 5))

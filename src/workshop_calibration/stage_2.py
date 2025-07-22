@@ -9,6 +9,7 @@
 # ---
 
 # %%
+# Step 0 : Import Libraries
 import marimo as mo
 import pandas as pd
 import numpy as np
@@ -30,43 +31,54 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # %%
-# Part 1 : Load the dataset
-
+# Step 1 : Data Loading
 random.seed(1)
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
 
-data = arff.loadarff("../../data/dataset_multiclass.arff")
+data = arff.loadarff("../../data/___")  # TODO
 df = pd.DataFrame(data[0])
 
-print(df.head())
+print(df.head(___))  # TODO
 
-X = df.drop("Class", axis=1)
-y = df["Class"].astype(int).subtract(1)
+# %%
+# Step 2 : Data preparation
+X = df.drop("___", axis=1)  # TODO
+y = df["___"].astype(___).subtract(___)  # TODO
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.90,
-    shuffle=False,
+print(X.head(5))
+print(y.head(5))
+
+# %%
+# Step 3 : Data Splitting for Training, Calibration and Testing
+X_train, X_test, y_train, y_test = ___(  # TODO
+    ___,  # TODO
+    ___,  # TODO
+    test_size=___,  # TODO
+    shuffle=___,  # TODO
 )
 
 X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
-    X_train,
-    y_train,
-    test_size=0.2,
-    shuffle=False,
+    ___,  # TODO
+    ___,  # TODO
+    ___,  # TODO
+    ___,  # TODO
 )
 
+print(X_proper_train.head())
+print(X_cal.head())
+print(y_proper_train.head())
+print(y_cal.head())
+
 # %%
-# Part 2 : Define the models to test
+# Step 4 : Define the models to test
 clfs = {}
 clfs["Naive Bayes"] = GaussianNB()
 clfs["SVM"] = SVC(probability=True)
 clfs["RF"] = RandomForestClassifier()
-clfs["XGB"] = AdaBoostClassifier()
+clfs["AdaBoost"] = AdaBoostClassifier()
 clfs["Logistic"] = LogisticRegression(max_iter=10000)
 clfs["Neural Network"] = MLPClassifier(max_iter=10000)
 
@@ -75,7 +87,7 @@ for name_model in clfs.keys():
 
 
 # %%
-# Part 3 : Define the metrics to evaluate the models
+# Step 5 : Define the metrics
 def metrics(
     clf,
     X_test,
@@ -87,20 +99,20 @@ def metrics(
     VennAbersCalibrator=False,
 ):
     if VennAbersCalibrator:
-        p_pred = clf.predict_proba(np.asarray(X_test))
-        y_pred = clf.predict(np.array(X_test), one_hot=False)
+        p_pred = clf.___(np.asarray(___))  # TODO
+        y_pred = clf.___(np.array(___), one_hot=False)  # TODO
     else:
-        p_pred = clf.predict_proba(X_test)
-        y_pred = clf.predict(X_test)
-    acc_list.append(f1_score(y_test, y_pred, average="weighted"))
-    log_loss_list.append(log_loss(y_test, p_pred))
-    brier_loss_list.append(brier_score_loss(y_test, p_pred))
-    ece_list.append(cal.get_calibration_error(p_pred, y_test))
+        p_pred = clf.predict_proba(___)  # TODO
+        y_pred = clf.predict(___)  # TODO
+    acc_list.append(___(y_test, y_pred, average="___"))  # TODO
+    log_loss_list.append(___(y_test, p_pred))  # TODO
+    brier_loss_list.append(___(y_test, p_pred))  # TODO
+    ece_list.append(___(p_pred, y_test))  # TODO
     return acc_list, log_loss_list, brier_loss_list, ece_list
 
 
 # %%
-# Part 4: Define the function to compare the models
+# Step 6: Calibrate the models
 def run_multiclass_comparison(clf_name, clf):
 
     print(clf_name + ":")
@@ -110,90 +122,96 @@ def run_multiclass_comparison(clf_name, clf):
     ece_list = []
 
     print("base")
-    clf.fit(X_train, y_train)
+    clf.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        clf,
-        X_test,
-        y_test,
-        acc_list,
-        log_loss_list,
-        brier_loss_list,
-        ece_list,
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
     )
 
     print("sigmoid")
-    clf.fit(X_proper_train, y_proper_train)
-    cal_sigm = CalibratedClassifierCV(clf, method="sigmoid", cv="prefit")
-    cal_sigm.fit(X_cal, y_cal)
+    clf.___(__, ___)  # TODO
+    cal_sigm = ___(__, ___, ___)  # TODO
+    cal_sigm.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        cal_sigm,
-        X_test,
-        y_test,
-        acc_list,
-        log_loss_list,
-        brier_loss_list,
-        ece_list,
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
     )
 
     print("isotonic")
-    cal_iso = CalibratedClassifierCV(clf, method="isotonic", cv="prefit")
-    cal_iso.fit(X_cal, y_cal)
+    cal_iso = ___(__, ___, ___)  # TODO
+    cal_iso.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        cal_iso,
-        X_test,
-        y_test,
-        acc_list,
-        log_loss_list,
-        brier_loss_list,
-        ece_list,
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
     )
 
     print("sigmoid_cv")
-    cal_sigm_cv = CalibratedClassifierCV(clf, method="sigmoid", cv=5)
-    cal_sigm_cv.fit(X_train, y_train)
+    cal_sigm_cv = ___(__, ___, ___)  # TODO
+    cal_sigm_cv.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        cal_sigm_cv,
-        X_test,
-        y_test,
-        acc_list,
-        log_loss_list,
-        brier_loss_list,
-        ece_list,
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
     )
 
     print("isotonic_cv")
-    cal_iso_cv = CalibratedClassifierCV(clf, method="isotonic", cv=5)
-    cal_iso_cv.fit(X_train, y_train)
+    cal_iso_cv = ___(__, ___, ___)  # TODO
+    cal_iso_cv.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        cal_iso_cv, X_test, y_test, acc_list, log_loss_list, brier_loss_list, ece_list
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
     )
 
     print("ivap")
-    va = VennAbersCalibrator(clf, inductive=True, cal_size=0.2)
-    va.fit(np.asarray(X_train), np.asarray(y_train))
+    va = ___(__, ___, ___)  # TODO
+    va.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        va,
-        X_test,
-        y_test,
-        acc_list,
-        log_loss_list,
-        brier_loss_list,
-        ece_list,
-        VennAbersCalibrator=True,
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        VennAbersCalibrator=___,  # TODO
     )
 
     print("cvap \n")
-    va_cv = VennAbersCalibrator(clf, inductive=False, n_splits=5)
-    va_cv.fit(np.asarray(X_train), np.asarray(y_train))
+    va_cv = ___(__, ___, ___)  # TODO
+    va_cv.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        va_cv,
-        X_test,
-        y_test,
-        acc_list,
-        log_loss_list,
-        brier_loss_list,
-        ece_list,
-        VennAbersCalibrator=True,
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        ___,  # TODO
+        VennAbersCalibrator=___,  # TODO
     )
 
     df_ll = pd.DataFrame(
@@ -253,25 +271,26 @@ def run_multiclass_comparison(clf_name, clf):
 
 
 # %%
-# Part 5 : Compare models on multiclass classification
+# Step 7 : Compare models on multiclass classification
 print("Comparing models for multiclass classification")
 results_brier = pd.DataFrame()
 results_log = pd.DataFrame()
 results_acc = pd.DataFrame()
 results_ece = pd.DataFrame()
 
-for clf_name in clfs:
-    scratch_b, scratch_l, scratch_acc, scratch_ece = run_multiclass_comparison(
-        clf_name, clfs[clf_name]
+for ____ in ___:  # TODO
+    scratch_b, scratch_l, scratch_acc, scratch_ece = ___(  # TODO
+        ___,  # TODO
+        ___,  # TODO
     )
-    results_brier = pd.concat((results_brier, scratch_b), ignore_index=True)
-    results_log = pd.concat((results_log, scratch_l), ignore_index=True)
-    results_acc = pd.concat((results_acc, scratch_acc), ignore_index=True)
-    results_ece = pd.concat((results_ece, scratch_ece), ignore_index=True)
+    results_brier = pd.concat((___, ___), ignore_index=True)  # TODO
+    results_log = pd.concat((___, ___), ignore_index=True)  # TODO
+    results_acc = pd.concat((___, ___), ignore_index=True)  # TODO
+    results_ece = pd.concat((___, ___), ignore_index=True)  # TODO
 
 
 # %%
-# Part 6 : Define the function to convert the dataframe to a markdown table
+# Step 8 : Define the function to convert the dataframe to a markdown table
 def df_to_markdown_table(df, higher_is_better=True):
     # Convert to float and find best indices
     df_float = df.select_dtypes(include=["number"])
@@ -336,7 +355,7 @@ if "Classifier" in results_log.columns:
     results_log.set_index("Classifier", inplace=True)
 
 # %%
-# Part 7 : Display the results
+# Step 9 : Display the results
 mo.md(
     "## Accuracy Results\n"
     + df_to_markdown_table(results_acc, higher_is_better=True)

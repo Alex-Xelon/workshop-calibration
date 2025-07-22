@@ -113,45 +113,62 @@ Calibrate a binary classification model so that its predicted probabilities refl
 Adapt calibration techniques to a multi-class classification problem.
 
 ### **Instructions :**
-### Step 1 : Data Splitting for Training and Calibration
-- Complete the arguments of the `train_test_split` function so that the binary dataset is split into train and test sets without shuffling, allocating 10% of the data for training and 90% for testing.
-- Use the `train_test_split` function again to split the data for calibration, this time setting the test_size to 0.8 (for the calibration set) and train_size to 0.2 (for the proper training set), and do not shuffle the data.
+### Step 0 : Import Libraries
+- Execute the import cell to ensure all required libraries are loaded.
 
-### Step 2 : Base Model Training and Evaluation
-- For base model, fit the model on the training set and predict the probabilities on the test set and the classes on the test set.
-- Store the f1 score with average "weighted" in acc_list, log loss in log_loss_list, brier score in brier_loss_list and ece in ece_list for the base model.
+### Step 1 : Data Loading
+- Load the dataset from the `dataset_stage_2.arff` file.
+- Print the first 10 rows of the dataset.
 
-### Step 3 : Sigmoid Calibration
-- For sigmoid calibration, prefit the model on the proper training set, calibrate the model with method "sigmoid" and cv="prefit" on the calibration set and predict the probabilities on the test set and the classes on the test set.
-- Store the f1 score with average "weighted" in acc_list, log loss in log_loss_list, brier score in brier_loss_list and ece in ece_list for the sigmoid calibrated model.
+### Step 2 : Data preparation
+- Separate the features (`X`) by dropping the `Class` column from the DataFrame.
+- Extract the labels (`y`) by converting the `Class` column to integers and subtracting 1.
 
-### Step 4 : Isotonic Calibration
-- For isotonic calibration, prefit the model on the proper training set, calibrate the model with method "isotonic" and cv="prefit" on the calibration set and predict the probabilities on the test set and the classes on the test set.
-- Store the f1 score with average "weighted" in acc_list, log loss in log_loss_list, brier score in brier_loss_list and ece in ece_list for the isotonic calibrated model.
+### Step 3 : Data Splitting for Training, Calibration and Testing
+- Complete the arguments of the `train_test_split` function so that the dataset is split into train and test sets without shuffling, allocating 10% of the data for training and 90% for testing.
+- Use the `train_test_split` function again to split the training data into a proper training set (80%) and a calibration set (20%), without shuffling.
 
-### Step 5 : Isotonic Calibration with Cross-Validation
-- For isotonic calibration with cross-validation, prefit the model on the proper training set, calibrate the model with method "isotonic" and cv=5 on the calibration set and predict the probabilities on the test set and the classes on the test set.
-- Store the f1 score with average "weighted" in acc_list, log loss in log_loss_list, brier score in brier_loss_list and ece in ece_list for the isotonic calibrated model with cross-validation.
+### Step 4 : Define the models
+- Run the following cell to define the models to test
 
-### Step 6 : Sigmoid Calibration with Cross-Validation
-- For sigmoid calibration with cross-validation, prefit the model on the proper training set, calibrate the model with method "sigmoid" and cv=5 on the calibration set and predict the probabilities on the test set and the classes on the test set.
-- Store the f1 score with average "weighted" in acc_list, log loss in log_loss_list, brier score in brier_loss_list and ece in ece_list for the sigmoid calibrated model with cross-validation.
+### Step 5 : Define the metrics
+- Determine probabilities and classes for the test set using the `predict_proba` and `predict` methods of the classifier either with or without Venn-Abers calibration.
+- Calculate the F1 score for multi-class classification on the test set using the weighted approach to ensure your method is suitable for imbalanced class distribution.
+- Calculate the log loss, Brier score and ECE for the test set using the `log_loss`, `brier_score_loss` and `cal.get_calibration_error` functions.
 
-### Step 7 : IVAP Calibration
-- For IVAP calibration, prefit the model on the proper training set, calibrate the model on the calibration set with inductive true and size of calibration set of 0.2 and predict the probabilities on the test set and the classes on the test set.
-- Store the f1 score with average "weighted" in acc_list, log loss in log_loss_list, brier score in brier_loss_list and ece in ece_list for the Venn-Abers calibrated model.
+### Step 6 : Calibrate the models
+- **Base model** :
+   - Fit the model on the training set using `fit` and fulfill the metrics fonction to calculate the metrics for the base model.
+- **Sigmoid** :
+   - Fit the model on the proper training set using `fit`
+   - Calibrate the model with method "sigmoid" and cv="prefit" on the calibration set using `CalibratedClassifierCV` and fit the calibrated model on the calibration set
+   - Fulfill the metrics fonction with the test set
+- **Isotonic** :
+   - Calibrate the model with method "isotonic" and cv="prefit" on the calibration set using `CalibratedClassifierCV` and fit the calibrated model on the calibration set
+   - Fulfill the metrics fonction with the test set
+- **Sigmoid cv** :
+   - Use `CalibratedClassifierCV` with method "sigmoid" and 5-fold cross-validation to calibrate the model, then fit the calibrated model on the calibration set
+   - Fulfill the metrics fonction with the test set
+- **Isotonic cv** :
+   - Use `CalibratedClassifierCV` with method "isotonic" and 5-fold cross-validation to calibrate the model, then fit the calibrated model on the calibration set
+   - Fulfill the metrics fonction with the test set
+- **IVAP** :
+   - Use `VennAbersCalibrator` to calibrate the model with inductive false and 5 splits, then fit the calibrated model on the training set
+   - Fulfill the metrics fonction with the test set with VennAbersCalibrator parameter set to True
+- **CVAP** :
+   - Use `VennAbersCalibrator` to calibrate the model with inductive false and 5 splits, then fit the calibrated model on the training set
+   - Fulfill the metrics fonction with the test set with VennAbersCalibrator parameter set to False
 
-### Step 8 : CVAP Calibration with Cross-Validation
-- For CVAP calibration with cross-validation, prefit the model on the proper training set, calibrate the model on the calibration set with inductive false and 5 splits, then predict the probabilities on the test set and the classes on the test set.
-- Store the f1 score with average "weighted" in acc_list, log loss in log_loss_list, brier score in brier_loss_list and ece in ece_list for the Venn-Abers calibrated model with cross-validation.
+### Step 7 : Calibration Comparison
+- Loop through each classifier `clf_name` in the `clfs` dictionary.
+- For each classifier, run the calibration comparison function `run_multiclass_comparison` with the correct arguments.
+- Add the results from each classifier to the overall results DataFrames, making sure to ignore the index when combining them.
 
-### Step 9 : Calibration Comparison
-- For each classifier name in the dictionary `clfs`, iterate over the classifiers and run the calibration comparison for each classifier in your list.
-- Concatenate `results_brier`, `results_log_loss`, `results_acc`, and `results_ece` with the new `scratch_brier`, `scratch_log_loss`, `scratch_acc`, and `scratch_ece`, ignoring the index.
+### Step 8 : Plot Results
+- Execute the following cell to plot the results of the calibration methods.
 
-### Step 10 : Calibration Comparison and Results Aggregation
-- For each classifier name in the dictionary `clfs`, iterate over the classifiers and run the calibration comparison for each classifier in your list.
-- Concatenate `results_brier`, `results_log_loss`, `results_acc`, and `results_ece` with the new `scratch_brier`, `scratch_log_loss`, `scratch_acc`, and `scratch_ece`, ignoring the index.
+### Step 9 : Run metrics function
+- Execute the following cell to run the metrics function used in the previous step
 
 ---
 
@@ -161,20 +178,38 @@ Adapt calibration techniques to a multi-class classification problem.
 Calibrate a multi-label classification model where each sample can belong to multiple classes.
 
 ### **Instructions :**
-### Step 1 : Data Preparation and Splitting
+### Step 0 : Import Libraries
+- Execute the import cell to ensure all required libraries are loaded.
+
+### Step 1 : Data loading
+- Load the dataset from the dataset path for stage 3.
+- Print the first 10 rows of the dataset.
+
+### Step 2 : Data Preparation
+- Select all numeric columns from the DataFrame using `select_dtypes()`, retrieve them with the `columns` attribute and assign them to `X`.
+- Use label_cols to assign the labels `y` as an integer numpy array.
+- Print the first 5 rows of `X` and `y` to verify the data preparation.
+
+### Step 3 : Data Splitting
 - Split the data into training and test sets using `train_test_split`, allocating 90% for testing and 10% for training, without shuffling, and set a random seed for reproducibility.
 - Further split the training set into a "proper training" set and a "calibration" set using `train_test_split` again, with 80% for proper training and 20% for calibration, also without shuffling and with the same random seed.
-- Print the heads of all resulting splits (X_train, y_train, X_test, y_test, X_proper_train, y_proper_train, X_cal, y_cal) to verify the splits.
 
-### Step 2 : Base Model Training and Evaluation
+### Step 4 : Base Model Training and Evaluation
 - Instantiate a base classifier using `RandomForestClassifier` with the specified `random_state`.
 - Wrap the base classifier with `MultiOutputClassifier` to enable multi-label classification.
-- Fit the multi-label classifier on the training data.
-- Predict the class probabilities and labels for the test set.
+- Fit the multi-label classifier on the training data using `fit` method.
+- Predict the class probabilities and labels for the test set using `predict_proba` and `predict` methods.
 
-### Step 3 : Calibration by Output
-- For each label in y, create a CalibratedClassifierCV with method="sigmoid" and cv=10 and fit each calibrated classifier on the corresponding column of y_train
-- Predict the probabilities and labels for the test set.
-- Convert the lists of predicted probabilities and labels to numpy matrices for further evaluation.
+### Step 5 : Model Calibration
+- For each label in y, create a `CalibratedClassifierCV` with sigmoid method and cross-validation with 10 folds
+- Fit each calibrated classifier on the corresponding column of y_train and add the calibrated classifier to the `calibrated_clfs` list.
+- Predict the probabilities and labels for the test set using `predict_proba` and `predict` methods.
+- Convert the lists of predicted probabilities and labels to numpy matrices for further evaluation using `np.vstack` and `np.column_stack`.
+
+### Step 6 : Compute metrics
+- Run the following cell to compute the metrics for the uncalibrated and calibrated models.
+
+### Step 7 : Visualisation
+- Execute the following cell to plot the results of the calibration methods.
 
 ---
