@@ -30,7 +30,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # %%
-# Step 1 : Load the dataset
+# Part 1 : Load the dataset
 
 random.seed(1)
 
@@ -61,7 +61,7 @@ X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
 )
 
 # %%
-# Step 2 : Define the models to test
+# Part 2 : Define the models to test
 clfs = {}
 clfs["Naive Bayes"] = GaussianNB()
 clfs["SVM"] = SVC(probability=True)
@@ -75,7 +75,7 @@ for name_model in clfs.keys():
 
 
 # %%
-# Step 3 : Define the metrics to evaluate the models
+# Part 3 : Define the metrics to evaluate the models
 def metrics(
     clf,
     X_test,
@@ -100,7 +100,7 @@ def metrics(
 
 
 # %%
-# Step 4: Define the function to compare the models
+# Part 4: Define the function to compare the models
 def run_multiclass_comparison(clf_name, clf):
 
     print(clf_name + ":")
@@ -253,7 +253,7 @@ def run_multiclass_comparison(clf_name, clf):
 
 
 # %%
-# Step 5 : Compare models on multiclass classification
+# Part 5 : Compare models on multiclass classification
 print("Comparing models for multiclass classification")
 results_brier = pd.DataFrame()
 results_log = pd.DataFrame()
@@ -271,7 +271,7 @@ for clf_name in clfs:
 
 
 # %%
-# Step 6 : Define the function to convert the dataframe to a markdown table
+# Part 6 : Define the function to convert the dataframe to a markdown table
 def df_to_markdown_table(df, higher_is_better=True):
     # Convert to float and find best indices
     df_float = df.select_dtypes(include=["number"])
@@ -336,7 +336,7 @@ if "Classifier" in results_log.columns:
     results_log.set_index("Classifier", inplace=True)
 
 # %%
-# Step 7 : Display the results
+# Part 7 : Display the results
 mo.md(
     "## Accuracy Results\n"
     + df_to_markdown_table(results_acc, higher_is_better=True)

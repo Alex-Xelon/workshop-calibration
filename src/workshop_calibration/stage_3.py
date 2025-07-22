@@ -23,7 +23,7 @@ import calibration as cal
 
 
 # %%
-# Step 1 : Load the dataset
+# Part 1 : Data Preparation and Splitting
 
 random_state = 6
 
@@ -80,7 +80,7 @@ X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
 )
 
 # %%
-# Step 2 : Multi-output classifier non calibrated
+# Part 2 : Multi-output classifier non calibrated
 
 base_clf = RandomForestClassifier(random_state=random_state)
 multi_clf = MultiOutputClassifier(base_clf)
@@ -89,7 +89,7 @@ pred_probs_uncalibrated = multi_clf.predict_proba(X_test)
 pred_y_uncalibrated = multi_clf.predict(X_test)
 
 # %%
-# Step 3 : Model calibration
+# Part 3 : Model calibration
 
 calibrated_clfs = []
 pred_probs_calibrated = []
@@ -109,7 +109,7 @@ pred_y_uncalibrated_matrix = np.column_stack(pred_y_uncalibrated).T
 pred_y_calibrated_matrix = np.column_stack(pred_y_calibrated)
 
 # %%
-# Step 4 : Compute metrics
+# Part 4 : Compute metrics
 
 brier_scores_uncalibrated = [
     brier_score_loss(y_test.iloc[:, i], pred_probs_uncalibrated_matrix[:, i])
@@ -164,7 +164,7 @@ ece_score_df = pd.DataFrame(
 )
 
 # %%
-# Step 5 : Visualisation
+# Part 5 : Visualisation
 
 # Plot Accuracy per label before and after calibration
 plt.figure(figsize=(10, 5))

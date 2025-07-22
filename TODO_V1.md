@@ -21,11 +21,10 @@ Calibrate a binary classification model so that its predicted probabilities refl
 - Print the first 10 rows of the dataset.
 
 ### Step 2 : Class Balancing by Oversampling
-- Assign to `majority` the subset of `df` where the `label` column equals the most frequent value in `df.label` (i.e., the majority class).
-- Assign to `minority` the subset of `df` where the `label` column equals the least frequent value in `df.label` (i.e., the minority class).
+- Identify the majority and minority classes in your DataFrame `df` using the `label` column.
 - Use the `resample` function to upsample the minority class so that it has the same number of samples as the majority class.
 - Concatenate the upsampled minority class with the majority class to create a balanced DataFrame.
-- Shuffle the **entire** balanced DataFrame using `sample()` and reset its index with `reset_index()`, removing the old index.
+- Shuffle the entire balanced DataFrame using `sample()` and reset its index with `reset_index()`, removing the old index.
 
 ### Step 3 : Feature and Label Preparation
 - Separate the features (`X`) by dropping the `label` column from the DataFrame.
@@ -38,72 +37,68 @@ Calibrate a binary classification model so that its predicted probabilities refl
 - Use `train_test_split` to split the data into training and test sets, with 5% of the data for training and 95% for testing. Shuffle the data and stratify by the label.
 
 ### Step 6 : Data Splitting for Proper Training and Calibration
-- Use `train_test_split` again to split the training set into a proper training set (80%) and a calibration set (20%), shuffling and stratifying by the training labels.
+- Use `train_test_split` again to split the training set into a proper training set (80%) and a calibration set (20%), shuffling and stratifying by the label.
 
-### Step 7 : Model Definition
-- Execute the following cell to define a `models` dictionary with models to test.
+### Step 7 : Model Training and Evaluation (Uncalibrated)
+- For each model in the `models` dictionary :
+    - Fit the model on the training data, predict the probabilities for the positive class on the test set.
+    - Compute the F1 score (`f1_score`), Brier score (`brier_score_loss`), log loss (`log_loss`), and Expected Calibration Error (`cal.get_calibration_error`) between the true labels and the model's predictions (predicted classes or probabilities as appropriate).
 
-### Step 8 : Example of model training
-- Fit the model on the training data, predict the probabilities for the positive class and the classes on the test set.
+### Step 8 : Explicit Calibration with Platt (Sigmoid) and Isotonic
+- For each model in the `models` dictionary, iterate through the calibration methods "sigmoid" and "isotonic".
+- For each combination, fit the base model using the proper training set and use the trained model as the estimator for a `CalibratedClassifierCV` with the chosen calibration method.
+- Fit this calibrated model on the calibration set, predict probabilities for the positive class and classes on the test set.
+- Calculate the F1 score (`f1_score`), Brier score (`brier_score_loss`), log loss (`log_loss`), and Expected Calibration Error (`cal.get_calibration_error`) by comparing the true labels with the model's predictions.
 
-### Step 9 : Example of model evaluation
-- Compute the F1 score (`f1_score`), Brier score (`brier_score_loss`), log loss (`log_loss`), and Expected Calibration Error (`cal.get_calibration_error`) between the true labels and the model's predictions (predicted classes or probabilities as appropriate).
+### Step 9 : Explicit Calibration with Venn-Abers
+- For each model in the `models` dictionary, fit the base model on the proper training set, use the trained model to predict probabilities on both the calibration set and the test set.
+- Calibrate `VennAbersCalibrator` using the predicted probabilities and true labels from the calibration set and predicted probabilities from the test set.
+- After calibration, use the Venn-Abers calibrator to predict calibrated probabilities and classes for the test set.
+- Calculate the F1 score (`f1_score`), Brier score (`brier_score_loss`), log loss (`log_loss`), and Expected Calibration Error (`cal.get_calibration_error`) by comparing the true test labels with the model's predictions.
 
-### Step 10 : Model Evaluation
-- Execute the following cell to extend the example of model training and evaluation to all models in the `models` dictionary. For each model, the cell will:
-  - Fit the model on the training set (`X_train`, `y_train`).
-  - Predict probabilities and classes on the test set (`X_test`).
-  - Compute and print the F1 score, Brier score, log loss, and Expected Calibration Error (ECE) for each model.
-  - Store the results for each model in the `results` dictionary.
+### Step 10 : Uncalibrated Model
+- Fit a `GaussianNB` classifier on the training data.
+- Predict probabilities and classes on the test set.
+- Compute and store the F1 score, Brier score, log loss, and ECE for the predictions.
 
-### Step 11 : Example of model calibration : Sigmoid and Isotonic
-- For each calibration method ("sigmoid" and "isotonic"), create a `CalibratedClassifierCV` using the already-fitted `model_example` as the estimator, set `method` to the current calibration method, and `cv="prefit"`.
-- Fit the calibrated model on the calibration set.
-- Use the calibrated model to predict probabilities for the positive class (`predict_proba`) and predicted classes (`predict`) on the test set.
-- Compute the F1 score (`f1_score`), Brier score (`brier_score_loss`), log loss (`log_loss`), and Expected Calibration Error (`cal.get_calibration_error`) using the true test labels and the predictions (predicted classes or probabilities as appropriate).
-
-### Step 12 : Example of model calibration : Venn-Abers
-- Fit the model on the proper training set.
-- Get predicted probabilities for calibration and test sets (`predict_proba`).
-- Calibrate and predict with VennAbersCalibrator using the predicted probabilities and true labels from the calibration set and predicted probabilities from the test set.
-- Compute the F1 score (`f1_score`), Brier score (`brier_score_loss`), log loss (`log_loss`), and Expected Calibration Error (`cal.get_calibration_error`) using the true test labels and the predictions (predicted classes or probabilities as appropriate).
-
-### Step 13 : Model Calibration
-- Execute the following cell to extend the example of model calibration to all models in the `models` dictionary.
-
-### Step 14 : Plot Results
-- Execute the following cell to plot the results of the calibration methods.
-
-### Step 15 : Run metrics function
-- Execute the following cell to run the metrics function used in the previous step
-
-### Step 16 : Model Comparison
-- **Uncalibrated** :
-   - Fit a `GaussianNB` classifier on the training set and fulfill the run_metrics function
-- **Isotonic** :
-   - Apply `CalibratedClassifierCV` using the isotonic calibration method with 5-fold cross-validation
-   - Fit the calibrated classifier on the training set and fulfill the run_metrics function
-- **Isotonic prefit** :
-   - Fit the classifier on the proper training set
-   - Use the prefitted classifier as the estimator for a `CalibratedClassifierCV` with the isotonic method
-   - Fit the calibrated classifier on the calibration set and fulfill the run_metrics function
-- **Sigmoid** :
-   - Apply `CalibratedClassifierCV` using the sigmoid calibration method with 5-fold cross-validation
-   - Fit the calibrated classifier on the training set and fulfill the run_metrics function.
-- **Sigmoid prefit** :
-   - Fit a `GaussianNB` classifier on the proper training set
-   - Use the prefitted classifier as the estimator for a `CalibratedClassifierCV` with the sigmoid method
-   - Fit the calibrated classifier on the calibration set and fulfill the run_metrics function
-- **Prefit Venn-Abers** :
-   - Fit a `GaussianNB` classifier on the proper training set
-   - Predict probabilities for the calibration and test sets
-   - Fulfill the run_metrics function
-- **IVAP** :
+### Step 11 : IVAP Calibration
    - Perform Venn-Abers calibration using the inductive approach by reserving 20% of the training data for calibration.
-   - Fit the calibrated classifier on the training set and fulfill the run_metrics function
-- **CVAP** :
-   - Perform Venn-Abers calibration using the cross-validation approach with 2 splits, making sure that the calibration is done in a non-inductive manner.
-   - Fit the calibrated classifier on the training set and fulfill the run_metrics function.
+   - Predict probabilities and classes on the test set.
+   - Compute and store the F1 score, Brier score, log loss, and ECE.
+
+### Step 12 : CVAP Calibration
+   - Perform Venn-Abers calibration using the cross-validation approach with 2 splits, making sure that the calibration is done in a non-inductive (i.e., not using a held-out calibration set) manner.
+   - Predict probabilities and classes on the test set.
+   - Compute and store the F1 score, Brier score, log loss, and ECE.
+
+### Step 13 : Prefit Venn-Abers Calibration
+   - Randomly split the training data so that 20% is used as the proper training set and the remaining 80% is reserved for calibration.
+   - Fit the classifier on the proper training set and predict probabilities for the calibration and test sets.
+   - Predict probabilities and classes on the test set.
+   - Compute and store the F1 score, Brier score, log loss, and ECE.
+
+### Step 14 : Isotonic Calibration (cv=5)
+   - Apply `CalibratedClassifierCV` using the isotonic calibration method with 5-fold cross-validation.
+   - Fit the calibrated classifier on the calibration set and predict probabilities and classes on the test set.
+   - Compute and store the F1 score, Brier score, log loss, and ECE.
+
+### Step 15 : Isotonic Prefit Calibration
+   - Fit the classifier on the proper training set
+   - Use the fitted classifier as the estimator for a `CalibratedClassifierCV` with the isotonic method
+   - Fit the calibrated classifier on the calibration set and predict probabilities for the calibration and test sets.
+   - Predict probabilities and classes on the test set.
+   - Compute and store the F1 score, Brier score, log loss, and ECE.
+
+### Step 16 : Sigmoid Calibration (cv=5)
+   - Apply `CalibratedClassifierCV` using the sigmoid calibration method with 5-fold cross-validation.
+   - Fit the calibrated model on the training set and predict probabilities and classes on the test set.
+   - Compute and store the F1 score, Brier score, log loss, and ECE.
+
+### Step 17 : Sigmoid Prefit Calibration
+   - Fit the classifier on the proper training set
+   - Use the fitted classifier as the estimator for a `CalibratedClassifierCV` with the sigmoid method
+   - Fit the calibrated model on the calibration set and predict probabilities and classes on the test set.
+   - Compute and store the F1 score, Brier score, log loss, and ECE.
 
 ---
 

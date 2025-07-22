@@ -33,55 +33,56 @@ warnings.filterwarnings("ignore")
 # Step 1: Data Loading
 print("Loading the dataset")
 
-random_state = 28
+random_state = 1
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
 
-data = arff.loadarff("../../data/")  # TODO
+# Load ARFF file (replace with your actual file path)
+data = arff.loadarff("../../data/dataset_stage_1.arff")
 df = pd.DataFrame(data[0])
 
-print(df.head(___))  # TODO
+print(df.head(10))
 
 # %%
-
 # Step 2 : Balancing the classes by oversampling
-majority = df[df.___ == df.label.value_counts().idxmax()]  # TODO
-minority = df[df.label == df.label.___.___()]  # TODO
-minority_upsampled = ___(  # TODO
-    ___,  # TODO
+# Assume the label column is named 'label'
+majority = df[df.label == df.label.value_counts().idxmax()]
+minority = df[df.label == df.label.value_counts().idxmin()]
+minority_upsampled = resample(
+    minority,
     replace=True,
-    n_samples=len(___),  # TODO
+    n_samples=len(majority),
     random_state=random_state,
 )
 
-df = pd.concat([___, ___])  # TODO
-df = df.___(frac=___, random_state=random_state).reset_index(drop=___)  # TODO
+df = pd.concat([majority, minority_upsampled])
+df = df.sample(frac=1, random_state=random_state).reset_index(drop=True)
 
 print(df.head(10))
 
 # %%
 # Step 3 : Feature Preparation
-X = df.drop(columns=["___"])  # TODO
-y = df["___"].astype(___).values  # TODO
+X = df.drop(columns=["label"])
+y = df["label"].astype(int).values
 print(X.head(10))
-print(y.head(10))
+print(pd.Series(y).head(10))
 
 # %%
 # Step 4 : Feature Scaling
-scaler = ___()  # TODO
-X = scaler.fit_transform(___)  # TODO
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
 print(pd.DataFrame(X).head(10))
 
 # %%
 # Step 5 : Data Splitting for Training and Testing
 X_train, X_test, y_train, y_test = train_test_split(
-    ___,  # TODO
-    ___,  # TODO
-    shuffle=___,  # TODO
-    test_size=___,  # TODO
+    X,
+    y,
+    shuffle=True,
+    test_size=0.2,
     random_state=random_state,
-    stratify=___,  # TODO
+    stratify=y,
 )
 print(pd.DataFrame(X_train).head(5))
 print(pd.Series(y_train).head(5))
@@ -91,12 +92,12 @@ print(pd.Series(y_test).head(5))
 # %%
 # Step 6 : Data Splitting for Proper Training and Calibration
 X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
-    ___,  # TODO
-    ___,  # TODO
-    shuffle=___,  # TODO
-    test_size=___,  # TODO
+    X_train,
+    y_train,
+    shuffle=True,
+    test_size=0.2,
     random_state=random_state,
-    stratify=___,  # TODO
+    stratify=y_train,
 )
 print(pd.DataFrame(X_proper_train).head(5))
 print(pd.Series(y_proper_train).head(5))
@@ -132,19 +133,19 @@ model_example = LogisticRegression(
     max_iter=5000,
     random_state=random_state,
 )
-model_example.fit(___, ___)  # TODO
-probs_example = model_example.predict_proba(___)[:, 1]  # TODO
-preds_example = model_example.predict(___)  # TODO
+model_example.fit(X_proper_train, y_proper_train)
+probs_example = model_example.predict_proba(X_test)[:, 1]
+preds_example = model_example.predict(X_test)
 
 print(probs_example[:5])
 print(preds_example[:5])
 
 # %%
 # Step 9 : Example of model evaluation
-acc_example = f1_score(___, ___)  # TODO
-brier_example = brier_score_loss(___, ___)  # TODO
-logloss_example = log_loss(___, ___)  # TODO
-ece_example = cal.get_calibration_error(___, ___)  # TODO
+acc_example = f1_score(y_test, preds_example)
+brier_example = brier_score_loss(y_test, probs_example)
+logloss_example = log_loss(y_test, probs_example)
+ece_example = cal.get_calibration_error(probs_example, y_test)
 
 print(f"Score Accuracy: {acc_example:.3f}")
 print(f"Brier Score: {brier_example:.3f}")
@@ -176,21 +177,21 @@ for name, model in models.items():
 
 # %%
 # Step 11 : Example of model calibration : Sigmoid and Isotonic
-for method in ["___", "___"]:  # TODO
+for method in ["sigmoid", "isotonic"]:
     print(f"\nCalibrating LogisticRegression with {method} method")
     # Wrap with CalibratedClassifierCV using the chosen method
     calibrated_model = CalibratedClassifierCV(
-        estimator=___, method=___, cv="prefit"  # TODO  # TODO  # TODO
+        estimator=model_example, method=method, cv="prefit"
     )
-    calibrated_model.fit(___, ___)  # TODO
+    calibrated_model.fit(X_cal, y_cal)
     # Predict probabilities and classes on the test set
-    probs_cal = calibrated_model.predict_proba(___)[:, 1]  # TODO
-    preds_cal = calibrated_model.predict(___)  # TODO
+    probs_cal = calibrated_model.predict_proba(X_test)[:, 1]
+    preds_cal = calibrated_model.predict(X_test)
     # Evaluate
-    acc_cal = f1_score(___, ___)  # TODO
-    brier_cal = brier_score_loss(___, ___)  # TODO
-    logloss_cal = log_loss(___, ___)  # TODO
-    ece_cal = cal.get_calibration_error(___, ___)  # TODO
+    acc_cal = f1_score(y_test, preds_cal)
+    brier_cal = brier_score_loss(y_test, probs_cal)
+    logloss_cal = log_loss(y_test, probs_cal)
+    ece_cal = cal.get_calibration_error(probs_cal, y_test)
     print(f"Score Accuracy: {acc_cal:.3f}")
     print(f"Brier Score: {brier_cal:.3f}")
     print(f"Log Loss: {logloss_cal:.3f}")
@@ -200,19 +201,19 @@ for method in ["___", "___"]:  # TODO
 # Step 12 : Example of model calibration : Venn-ABERS
 print("\nCalibrating LogisticRegression with Venn-ABERS method")
 # Fit the model on the proper training set
-model_example.fit(___, ___)  # TODO
+model_example.fit(X_proper_train, y_proper_train)
 # Get predicted probabilities for calibration and test sets
-p_cal = model_example.predict_proba(___)  # TODO
-p_test = model_example.predict_proba(___)  # TODO
+p_cal = model_example.predict_proba(X_cal)
+p_test = model_example.predict_proba(X_test)
 # Calibrate and predict with VennAbersCalibrator
 va = VennAbersCalibrator()
-probs_va = va.predict_proba(p_cal=___, y_cal=np.array(___), p_test=___)[:, 1]  # TODO
-preds_va = va.predict(p_cal=___, y_cal=np.array(___), p_test=___)[:, 1]  # TODO
+probs_va = va.predict_proba(p_cal=p_cal, y_cal=np.array(y_cal), p_test=p_test)[:, 1]
+preds_va = va.predict(p_cal=p_cal, y_cal=np.array(y_cal), p_test=p_test)[:, 1]
 # Evaluate
-acc_va = f1_score(___, ___)  # TODO
-brier_va = brier_score_loss(___, ___)  # TODO
-logloss_va = log_loss(___, ___)  # TODO
-ece_va = cal.get_calibration_error(___, ___)  # TODO
+acc_va = f1_score(y_test, preds_va)
+brier_va = brier_score_loss(y_test, probs_va)
+logloss_va = log_loss(y_test, probs_va)
+ece_va = cal.get_calibration_error(probs_va, y_test)
 print(f"Score Accuracy: {acc_va:.3f}")
 print(f"Brier Score: {brier_va:.3f}")
 print(f"Log Loss: {logloss_va:.3f}")
@@ -383,62 +384,62 @@ def compare_methods():
 
     # Uncalibrated
     clf = GaussianNB()
-    clf.fit(___, ___)  # TODO
-    run_metrics(___, ___, ___, ___)  # TODO
+    clf.fit(X_train, y_train)
+    run_metrics(clf, X_test, y_test, results)
 
     # Isotonic (cv=5)
-    iso = CalibratedClassifierCV(GaussianNB(), method="___", cv=___)  # TODO
-    iso.fit(___, ___)  # TODO
-    run_metrics(___, ___, ___, ___)  # TODO
+    iso = CalibratedClassifierCV(GaussianNB(), method="isotonic", cv=5)
+    iso.fit(X_train, y_train)
+    run_metrics(iso, X_test, y_test, results)
 
     # Isotonic prefit
     clf = GaussianNB()
-    clf.fit(___, ___)  # TODO
-    iso_prefit = CalibratedClassifierCV(___, method="___", cv="___")  # TODO
-    iso_prefit.fit(___, ___)  # TODO
-    run_metrics(___, ___, ___, ___)  # TODO
+    clf.fit(X_proper_train, y_proper_train)
+    iso_prefit = CalibratedClassifierCV(clf, method="isotonic", cv="prefit")
+    iso_prefit.fit(X_cal, y_cal)
+    run_metrics(iso_prefit, X_test, y_test, results)
 
     # Sigmoid (cv=5)
-    sig = CalibratedClassifierCV(GaussianNB(), method="___", cv=___)  # TODO
-    sig.fit(___, ___)  # TODO
-    run_metrics(___, ___, ___, ___)  # TODO
+    sig = CalibratedClassifierCV(GaussianNB(), method="sigmoid", cv=5)
+    sig.fit(X_train, y_train)
+    run_metrics(sig, X_test, y_test, results)
 
     # Sigmoid prefit
     clf = GaussianNB()
-    clf.fit(___, ___)  # TODO
-    sig_prefit = CalibratedClassifierCV(___, method="___", cv="___")  # TODO
-    sig_prefit.fit(___, ___)  # TODO
-    run_metrics(___, ___, ___, ___)  # TODO
+    clf.fit(X_proper_train, y_proper_train)
+    sig_prefit = CalibratedClassifierCV(clf, method="sigmoid", cv="prefit")
+    sig_prefit.fit(X_cal, y_cal)
+    run_metrics(sig_prefit, X_test, y_test, results)
 
     # Prefit
     clf = GaussianNB()
-    clf.fit(___, ___)  # TODO
-    p_cal = clf.predict_proba(___)  # TODO
-    p_test = clf.predict_proba(___)  # TODO
+    clf.fit(X_proper_train, y_proper_train)
+    p_cal = clf.predict_proba(X_cal)
+    p_test = clf.predict_proba(X_test)
     va = VennAbersCalibrator()
     va_prefit_prob = va.predict_proba(
         p_cal=p_cal, y_cal=np.array(y_cal), p_test=p_test
     )[:, 1]
     y_pred = va.predict(p_cal=p_cal, y_cal=np.array(y_cal), p_test=p_test)[:, 1]
-    run_metrics(___, ___, ___, ___, ___, ___)  # TODO
+    run_metrics(va, X_test, y_test, results, va_prefit_prob, y_pred)
 
     # IVAP
     va = VennAbersCalibrator(
         estimator=GaussianNB(),
-        inductive=___,  # TODO
-        cal_size=___,  # TODO
+        inductive=True,
+        cal_size=0.2,
     )
-    va.fit(___, ___)  # TODO
-    run_metrics(___, ___, ___, ___, ___, ___)  # TODO
+    va.fit(X_train, y_train)
+    run_metrics(va, X_test, y_test, results, va=True)
 
     # CVAP
     va = VennAbersCalibrator(
         estimator=GaussianNB(),
-        inductive=___,  # TODO
-        n_splits=___,  # TODO
+        inductive=False,
+        n_splits=2,
     )
-    va.fit(___, ___)  # TODO
-    run_metrics(___, ___, ___, ___, ___, ___)  # TODO
+    va.fit(X_train, y_train)
+    run_metrics(va, X_test, y_test, results, va=True)
 
     print(
         "Summary of the results for the different calibration methods (base model: GaussianNB):"
