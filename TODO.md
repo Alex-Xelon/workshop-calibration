@@ -193,32 +193,35 @@ Calibrate a multi-label classification model where each sample can belong to mul
 - Execute the import cell to ensure all required libraries are loaded.
 
 ### Step 1 : Data loading
-- Load the dataset from the dataset path for stage 3.
+- Load the dataset from the dataset path for stage 3 using `loadarff` method from `arff` library.
 - Print the first 10 rows of the dataset.
 
 ### Step 2 : Data Preparation
-- Select all numeric columns from the DataFrame using `select_dtypes()`, retrieve them with the `columns` attribute and assign them to `X`.
-- Use label_cols to assign the labels `y` as an integer numpy array.
-- Print the first 5 rows of `X` and `y` to verify the data preparation.
+- Select all numeric columns from the DataFrame using `select_dtypes()` and assign them to `X`.
+- Use label_cols to assign the labels `y` and convert values to integers.
 
 ### Step 3 : Data Splitting
-- Split the data into training and test sets using `train_test_split`, allocating 90% for testing and 10% for training, without shuffling, and set a random seed for reproducibility.
-- Further split the training set into a "proper training" set and a "calibration" set using `train_test_split` again, with 80% for proper training and 20% for calibration, also without shuffling and with the same random seed.
+- Split the data into training and test sets using `train_test_split`, allocating 90% for testing and 10% for training, without shuffling, and set the random_state parameter to `random_state` variable.
+- Further split the training set into a "proper training" set and a "calibration" set using `train_test_split` again, with 80% for proper training and 20% for calibration, also without shuffling and with the same random_state parameter.
 
 ### Step 4 : Base Model Training and Evaluation
 - Instantiate a base classifier using `RandomForestClassifier` with the specified `random_state`.
 - Wrap the base classifier with `MultiOutputClassifier` to enable multi-label classification.
-- Fit the multi-label classifier on the training data using `fit` method.
-- Predict the class probabilities and labels for the test set using `predict_proba` and `predict` methods.
+- Fit the multi-label classifier on the training data.
+- Predict the class probabilities and labels for the test set.
 
 ### Step 5 : Model Calibration
-- For each label in y, create a `CalibratedClassifierCV` with sigmoid method and cross-validation with 10 folds
-- Fit each calibrated classifier on the corresponding column of y_train and add the calibrated classifier to the `calibrated_clfs` list.
-- Predict the probabilities and labels for the test set using `predict_proba` and `predict` methods.
+- For each label in y, create a `CalibratedClassifierCV` with sigmoid method and cross-validation with 10 folds.
+- Fit each calibrated classifier on the corresponding column of the training set and add the calibrated classifier to the `calibrated_clfs` list.
+- Predict the probabilities and labels for the test set.
 - Convert the lists of predicted probabilities and labels to numpy matrices for further evaluation using `np.vstack` and `np.column_stack`.
+> Note: You can use the transpose to flip the matrix and obtain the correct format if needed.
 
 ### Step 6 : Compute metrics
-- Run the following cell to compute the metrics for the uncalibrated and calibrated models.
+- For each label in the test set, compute the Brier score for both the uncalibrated and calibrated models and store the results in the `brier_scores_uncalibrated` and `brier_scores_calibrated` lists.
+- For each label, compute the accuracy for both the uncalibrated and calibrated models and store the results in the `accuracy_scores_uncalibrated` and `accuracy_scores_calibrated` lists.
+- For each label, compute the Expected Calibration Error (ECE) for both the uncalibrated and calibrated models and store the results in the `ece_scores_uncalibrated` and `ece_scores_calibrated` lists.
+
 
 ### Step 7 : Visualisation
 - Execute the following cell to plot the results of the calibration methods.
