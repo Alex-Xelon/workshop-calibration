@@ -164,14 +164,13 @@ def run_multiclass_comparison(clf_name, clf):
     ___  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = ___  # TODO
 
-    print("sigmoid")
-    ___  # TODO
-    cal_sigm = ___  # TODO
+    print("ivap")
+    va = ___  # TODO
     ___  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = ___  # TODO
 
-    print("isotonic")
-    cal_iso = ___  # TODO
+    print("cvap")
+    va_cv = ___  # TODO
     ___  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = ___  # TODO
 
@@ -185,13 +184,14 @@ def run_multiclass_comparison(clf_name, clf):
     ___  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = ___  # TODO
 
-    print("ivap")
-    va = ___  # TODO
+    print("sigmoid")
+    ___  # TODO
+    cal_sigm = ___  # TODO
     ___  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = ___  # TODO
 
-    print("cvap \n")
-    va_cv = ___  # TODO
+    print("isotonic \n")
+    cal_iso = ___  # TODO
     ___  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = ___  # TODO
 

@@ -31,7 +31,6 @@ print(___)  # TODO
 
 # %%
 # Step 2 : Data Preparation
-numeric_cols = ___  # TODO
 X = ___  # TODO
 
 label_cols = [
@@ -61,14 +60,22 @@ X_train, X_test, y_train, y_test = ___  # TODO
 
 X_proper_train, X_cal, y_proper_train, y_cal = ___  # TODO
 
-print(X_train.head())
-print(y_train.head())
-print(X_test.head())
-print(y_test.head())
-print(X_proper_train.head())
-print(y_proper_train.head())
-print(X_cal.head())
-print(y_cal.head())
+print(f"\n X_train :\n{X_train.head()}")
+print(f"shape : {X_train.shape}")
+print(f"\n y_train :\n{y_train.head()}")
+print(f"shape : {y_train.shape}")
+print(f"\n X_test :\n{X_test.head()}")
+print(f"shape : {X_test.shape}")
+print(f"\n y_test :\n{y_test.head()}")
+print(f"shape : {y_test.shape}")
+print(f"\n X_proper_train :\n{X_proper_train.head()}")
+print(f"shape : {X_proper_train.shape}")
+print(f"\n y_proper_train :\n{y_proper_train.head()}")
+print(f"shape : {y_proper_train.shape}")
+print(f"\n X_cal :\n{X_cal.head()}")
+print(f"shape : {X_cal.shape}")
+print(f"\n y_cal :\n{y_cal.head()}")
+print(f"shape : {y_cal.shape}")
 
 # %%
 # Step 4 : Multi-output classifier non calibrated
@@ -78,8 +85,8 @@ multi_clf = ___  # TODO
 pred_probs_uncalibrated = ___  # TODO
 pred_y_uncalibrated = ___  # TODO
 
-print(pred_probs_uncalibrated.shape)
-print(pred_y_uncalibrated.shape)
+print(f"\n pred_probs_uncalibrated :\n{pred_probs_uncalibrated}")
+print(f"\n pred_y_uncalibrated :\n{pred_y_uncalibrated}")
 
 
 # %%
@@ -96,6 +103,15 @@ pred_probs_calibrated_matrix = ___  # TODO
 
 pred_y_uncalibrated_matrix = ___  # TODO
 pred_y_calibrated_matrix = ___  # TODO
+
+print(f"pred_probs_uncalibrated_matrix:\n{pred_probs_uncalibrated_matrix}")
+print(f"shape: {pd.DataFrame(pred_probs_uncalibrated_matrix).shape}")
+print(f"pred_probs_calibrated_matrix:\n{pred_probs_calibrated_matrix}")
+print(f"shape: {pd.DataFrame(pred_probs_calibrated_matrix).shape}")
+print(f"pred_y_uncalibrated_matrix:\n{pred_y_uncalibrated_matrix}")
+print(f"shape: {pd.DataFrame(pred_y_uncalibrated_matrix).shape}")
+print(f"pred_y_calibrated_matrix:\n{pred_y_calibrated_matrix}")
+print(f"shape: {pd.DataFrame(pred_y_calibrated_matrix).shape}")
 
 # %%
 # Step 6 : Compute metrics

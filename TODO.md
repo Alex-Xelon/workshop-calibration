@@ -110,10 +110,10 @@ Calibrate a binary classification model so that its predicted probabilities refl
    - Fulfill the run_metrics function
    > Note : The `predict` and `predict_proba` methods of `VennAbersCalibrator` return a numpy array of shape (n_samples, n_classes). To get the probabilities for the positive class, you need to select the second column of the array.
 - **IVAP** :
-   - Perform Venn-Abers calibration with a `GaussianNB` classifier using the **inductive** approach by reserving **20%** of the training data for calibration.
+   - Perform Venn-Abers calibration with a `GaussianNB` classifier using the **inductive** approach by reserving **20%** of the training data for calibration. Set random_state parameter to 0.
    - Fit the calibrated classifier on the training set and fulfill the run_metrics function
 - **CVAP** :
-   - Perform Venn-Abers calibration with a `GaussianNB` classifier using the **cross-validation** approach with **2 splits**, making sure that the calibration is done in a non-inductive manner.
+   - Perform Venn-Abers calibration with a `GaussianNB` classifier using the **cross-validation** approach with **5 splits**, making sure that the calibration is done in a non-inductive manner. Set `random_state` to 0.
    - Fit the calibrated classifier on the training set and fulfill the run_metrics function.
 
 ---
