@@ -7,7 +7,7 @@
 ![Jupyter Notebook](https://img.shields.io/badge/jupyter-orange?style=flat&logo=jupyter&logoColor=white)
 ![Scikit-Learn](https://img.shields.io/badge/scikit--learn-f3f3f3?style=flat&logo=scikit-learn&logoColor=orange)\
 ![GitHub repo size](https://img.shields.io/github/repo-size/Alex-Xelon/workshop-calibration)
-![Last Commit](https://img.shields.io/github/last-commit/Alex-Xelon/workshop-calibration)
+![Last Commit](https://img.shields.io/github/last-commit/Alex-Xelon/workshop-calibration/hard)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-43a047.svg)
 
 
