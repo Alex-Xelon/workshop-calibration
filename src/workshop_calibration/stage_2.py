@@ -12,7 +12,6 @@
 # Step 0 : Import Libraries
 import marimo as mo
 import pandas as pd
-import numpy as np
 import random
 from scipy.io import arff
 from sklearn.metrics import log_loss, brier_score_loss, f1_score
@@ -20,7 +19,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
 from venn_abers import VennAbersCalibrator
@@ -71,7 +69,6 @@ print(y_cal.head(5))
 # %%
 # Step 4 : Define the models to test
 clfs = {}
-clfs["Naive Bayes"] = GaussianNB()
 clfs["SVM"] = SVC(probability=True)
 clfs["RF"] = RandomForestClassifier()
 clfs["AdaBoost"] = AdaBoostClassifier()
@@ -81,9 +78,55 @@ clfs["Neural Network"] = MLPClassifier(max_iter=10000)
 for name_model in clfs.keys():
     print(f"- {name_model}")
 
+# %%
+# Step 5 : Example of calibration : Sigmoid and Isotonic
+model_example = ___  # TODO
+
+for method in [___]:  # TODO
+    print(f"\nCalibrating LogisticRegression with {method} method")
+    # Wrap with CalibratedClassifierCV using the chosen method
+    calibrated_model = ___  # TODO
+
+    # Predict probabilities and classes on the test set
+    probs_cal = ___  # TODO
+    preds_cal = ___  # TODO
+    print(f"Probs calibration: \n{pd.DataFrame(probs_cal).head(10)}")
+    print(f"Preds calibration: \n{pd.DataFrame(preds_cal).head(10)}")
 
 # %%
-# Step 5 : Define the metrics
+# Step 6 : Example of metrics : Sigmoid and Isotonic
+acc_cal = ___  # TODO
+brier_cal = ___  # TODO
+logloss_cal = ___  # TODO
+ece_cal = ___  # TODO
+print(f"Score Accuracy: {acc_cal:.3f}")
+print(f"Brier Score: {brier_cal:.3f}")
+print(f"Log Loss: {logloss_cal:.3f}")
+print(f"ECE: {ece_cal:.3f}")
+
+# %%
+# Step 7 : Example of calibration : VennAbersCalibrator
+va = ___  # TODO
+
+probs_va = ___  # TODO
+preds_va = ___  # TODO
+print(f"Probs calibration: \n{pd.DataFrame(probs_va).head(10)}")
+print(f"Preds calibration: \n{pd.DataFrame(preds_va).head(10)}")
+
+# %%
+# Step 8 : Example of metrics : VennAbersCalibrator
+acc_va = ___  # TODO
+brier_va = ___  # TODO
+logloss_va = ___  # TODO
+ece_va = ___  # TODO
+print(f"Score Accuracy: {acc_va:.3f}")
+print(f"Brier Score: {brier_va:.3f}")
+print(f"Log Loss: {logloss_va:.3f}")
+print(f"ECE: {ece_va:.3f}")
+
+
+# %%
+# Step 9 : Define the metrics
 def metrics(
     clf,
     X_test,
@@ -108,7 +151,7 @@ def metrics(
 
 
 # %%
-# Step 6: Calibrate the models
+# Step 10: Calibrate the models
 def run_multiclass_comparison(clf_name, clf):
 
     print(clf_name + ":")
@@ -209,7 +252,7 @@ def run_multiclass_comparison(clf_name, clf):
 
 
 # %%
-# Step 7 : Compare models on multiclass classification
+# Step 11 : Compare models on multiclass classification
 print("Comparing models for multiclass classification")
 results_brier = pd.DataFrame()
 results_log = pd.DataFrame()
@@ -225,7 +268,7 @@ for ___ in ___:  # TODO
 
 
 # %%
-# Step 8 : Define the function to convert the dataframe to a markdown table
+# Step 12 : Define the function to convert the dataframe to a markdown table
 def df_to_markdown_table(df, higher_is_better=True):
     # Convert to float and find best indices
     df_float = df.select_dtypes(include=["number"])
@@ -290,7 +333,7 @@ if "Classifier" in results_log.columns:
     results_log.set_index("Classifier", inplace=True)
 
 # %%
-# Step 9 : Display the results
+# Step 13 : Display the results
 mo.md(
     "## Accuracy Results\n"
     + df_to_markdown_table(results_acc, higher_is_better=True)

@@ -59,7 +59,7 @@ print(df.head(10))
 X = ___  # TODO
 y = ___  # TODO
 print(X.head(10))
-print(y.head(10))
+print(pd.DataFrame(y, columns=["label"]).head(10))
 
 # %%
 # Step 4 : Feature Scaling
@@ -154,8 +154,10 @@ for name, model in models.items():
     }
 
 # %%
+model_example.fit(X_proper_train, y_proper_train)
+
 # Step 11 : Example of model calibration : Sigmoid and Isotonic
-for method in ["___", "___"]:  # TODO
+for method in [___]:  # TODO
     print(f"\nCalibrating LogisticRegression with {method} method")
     # Wrap with CalibratedClassifierCV using the chosen method
     calibrated_model = ___  # TODO
@@ -374,21 +376,18 @@ def compare_methods():
     run_metrics(___)  # TODO
 
     # Isotonic prefit
-    clf = ___  # TODO
+    clf = GaussianNB()  # TODO
     iso_prefit = ___  # TODO
     run_metrics(___)  # TODO
 
     # Sigmoid (cv=5)
-    sig = CalibratedClassifierCV(GaussianNB(), method="___", cv=___)  # TODO
-    sig.fit(___, ___)  # TODO
-    run_metrics(___, ___, ___, ___)  # TODO
+    sig = ___  # TODO
+    run_metrics(___)  # TODO
 
     # Sigmoid prefit
-    clf = GaussianNB()
-    clf.fit(___, ___)  # TODO
-    sig_prefit = CalibratedClassifierCV(___, method="___", cv="___")  # TODO
-    sig_prefit.fit(___, ___)  # TODO
-    run_metrics(___, ___, ___, ___)  # TODO
+    clf = ___  # TODO
+    sig_prefit = ___  # TODO
+    run_metrics(___)  # TODO
 
     # Prefit
     clf = ___  # TODO
