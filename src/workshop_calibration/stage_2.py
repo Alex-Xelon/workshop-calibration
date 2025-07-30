@@ -12,7 +12,6 @@
 # Step 0 : Import Libraries
 import marimo as mo
 import pandas as pd
-import numpy as np
 import random
 from scipy.io import arff
 from sklearn.metrics import log_loss, brier_score_loss, f1_score
@@ -20,7 +19,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
 from venn_abers import VennAbersCalibrator
@@ -67,15 +65,21 @@ X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
     ___,  # TODO
 )
 
-print(X_proper_train.head())
-print(X_cal.head())
-print(y_proper_train.head())
-print(y_cal.head())
+print(X_train.head(5))
+print(X_test.head(5))
+print(y_train.head(5))
+print(y_test.head(5))
+
+print("\n\n")
+
+print(X_proper_train.head(5))
+print(X_cal.head(5))
+print(y_proper_train.head(5))
+print(y_cal.head(5))
 
 # %%
 # Step 4 : Define the models to test
 clfs = {}
-clfs["Naive Bayes"] = GaussianNB()
 clfs["SVM"] = SVC(probability=True)
 clfs["RF"] = RandomForestClassifier()
 clfs["AdaBoost"] = AdaBoostClassifier()
@@ -85,9 +89,66 @@ clfs["Neural Network"] = MLPClassifier(max_iter=10000)
 for name_model in clfs.keys():
     print(f"- {name_model}")
 
+# %%
+# Step 5 : Example of calibration : Sigmoid and Isotonic
+model_example = ___(random_state=28)  # TODO
+model_example.___(__, ___)  # TODO
+
+for method in [___, ___]:  # TODO
+    print(f"\nCalibrating LogisticRegression with {method} method")
+    # Wrap with CalibratedClassifierCV using the chosen method
+    calibrated_model = CalibratedClassifierCV(
+        estimator=___,  # TODO
+        method=___,  # TODO
+        cv=___,  # TODO
+    )
+    calibrated_model.___(__, ___)  # TODO
+
+    # Predict probabilities and classes on the test set
+    probs_cal = calibrated_model.___(___)  # TODO
+    preds_cal = calibrated_model.___(___)  # TODO
+    print(f"Probs calibration: \n{pd.DataFrame(probs_cal).head(10)}")
+    print(f"Preds calibration: \n{pd.DataFrame(preds_cal).head(10)}")
 
 # %%
-# Step 5 : Define the metrics
+# Step 6 : Example of metrics : Sigmoid and Isotonic
+acc_cal = ___(___, ___, average="___")  # TODO
+brier_cal = ___(___, ___)  # TODO
+logloss_cal = ___(___, ___)  # TODO
+ece_cal = ___(___, ___)  # TODO
+print(f"Score Accuracy: {acc_cal:.3f}")
+print(f"Brier Score: {brier_cal:.3f}")
+print(f"Log Loss: {logloss_cal:.3f}")
+print(f"ECE: {ece_cal:.3f}")
+
+# %%
+# Step 7 : Example of calibration : VennAbersCalibrator
+va = VennAbersCalibrator(
+    estimator=___(random_state=28),  # TODO
+    inductive=___,  # TODO
+    n_splits=___,  # TODO
+    random_state=28,
+)
+va.___(__, ___)  # TODO
+
+probs_va = va.___(___)  # TODO
+preds_va = va.___(___, one_hot=___)  # TODO
+print(f"Probs calibration: \n{pd.DataFrame(probs_va).head(10)}")
+print(f"Preds calibration: \n{pd.DataFrame(preds_va).head(10)}")
+
+# %%
+# Step 8 : Example of metrics : VennAbersCalibrator
+acc_va = ___(___, ___, average="___")  # TODO
+brier_va = ___(___, ___)  # TODO
+logloss_va = ___(___, ___)  # TODO
+ece_va = ___(___, ___)  # TODO
+print(f"Score Accuracy: {acc_va:.3f}")
+print(f"Brier Score: {brier_va:.3f}")
+print(f"Log Loss: {logloss_va:.3f}")
+print(f"ECE: {ece_va:.3f}")
+
+# %%
+# Step 9 : Define the metrics
 def metrics(
     clf,
     X_test,
@@ -99,8 +160,8 @@ def metrics(
     VennAbersCalibrator=False,
 ):
     if VennAbersCalibrator:
-        p_pred = clf.___(np.asarray(___))  # TODO
-        y_pred = clf.___(np.array(___), one_hot=False)  # TODO
+        p_pred = clf.___(___)  # TODO
+        y_pred = clf.___(___, one_hot=___)  # TODO
     else:
         p_pred = clf.predict_proba(___)  # TODO
         y_pred = clf.predict(___)  # TODO
@@ -110,9 +171,8 @@ def metrics(
     ece_list.append(___(p_pred, y_test))  # TODO
     return acc_list, log_loss_list, brier_loss_list, ece_list
 
-
 # %%
-# Step 6: Calibrate the models
+# Step 10: Calibrate the models
 def run_multiclass_comparison(clf_name, clf):
 
     print(clf_name + ":")
@@ -133,10 +193,9 @@ def run_multiclass_comparison(clf_name, clf):
         ___,  # TODO
     )
 
-    print("sigmoid")
-    clf.___(__, ___)  # TODO
-    cal_sigm = ___(__, ___, ___)  # TODO
-    cal_sigm.___(__, ___)  # TODO
+    print("ivap")
+    va = ___(__, ___, ___, random_state=28)  # TODO
+    va.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
         ___,  # TODO
         ___,  # TODO
@@ -145,11 +204,12 @@ def run_multiclass_comparison(clf_name, clf):
         ___,  # TODO
         ___,  # TODO
         ___,  # TODO
+        VennAbersCalibrator=___,  # TODO
     )
 
-    print("isotonic")
-    cal_iso = ___(__, ___, ___)  # TODO
-    cal_iso.___(__, ___)  # TODO
+    print("cvap")
+    va_cv = ___(__, ___, ___, random_state=28)  # TODO
+    va_cv.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
         ___,  # TODO
         ___,  # TODO
@@ -158,6 +218,7 @@ def run_multiclass_comparison(clf_name, clf):
         ___,  # TODO
         ___,  # TODO
         ___,  # TODO
+        VennAbersCalibrator=___,  # TODO
     )
 
     print("sigmoid_cv")
@@ -186,9 +247,10 @@ def run_multiclass_comparison(clf_name, clf):
         ___,  # TODO
     )
 
-    print("ivap")
-    va = ___(__, ___, ___)  # TODO
-    va.___(__, ___)  # TODO
+    print("sigmoid")
+    clf.___(__, ___)  # TODO
+    cal_sigm = ___(__, ___, ___)  # TODO
+    cal_sigm.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
         ___,  # TODO
         ___,  # TODO
@@ -197,12 +259,11 @@ def run_multiclass_comparison(clf_name, clf):
         ___,  # TODO
         ___,  # TODO
         ___,  # TODO
-        VennAbersCalibrator=___,  # TODO
     )
 
-    print("cvap \n")
-    va_cv = ___(__, ___, ___)  # TODO
-    va_cv.___(__, ___)  # TODO
+    print("isotonic \n")
+    cal_iso = ___(__, ___, ___)  # TODO
+    cal_iso.___(__, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
         ___,  # TODO
         ___,  # TODO
@@ -211,7 +272,6 @@ def run_multiclass_comparison(clf_name, clf):
         ___,  # TODO
         ___,  # TODO
         ___,  # TODO
-        VennAbersCalibrator=___,  # TODO
     )
 
     df_ll = pd.DataFrame(
@@ -269,9 +329,8 @@ def run_multiclass_comparison(clf_name, clf):
 
     return df_bl, df_ll, df_acc, df_ece
 
-
 # %%
-# Step 7 : Compare models on multiclass classification
+# Step 11 : Compare models on multiclass classification
 print("Comparing models for multiclass classification")
 results_brier = pd.DataFrame()
 results_log = pd.DataFrame()
@@ -283,14 +342,14 @@ for ____ in ___:  # TODO
         ___,  # TODO
         ___,  # TODO
     )
-    results_brier = pd.concat((___, ___), ignore_index=True)  # TODO
-    results_log = pd.concat((___, ___), ignore_index=True)  # TODO
-    results_acc = pd.concat((___, ___), ignore_index=True)  # TODO
-    results_ece = pd.concat((___, ___), ignore_index=True)  # TODO
+    results_brier = pd.concat((___, ___), ignore_index=___)  # TODO
+    results_log = pd.concat((___, ___), ignore_index=___)  # TODO
+    results_acc = pd.concat((___, ___), ignore_index=___)  # TODO
+    results_ece = pd.concat((___, ___), ignore_index=___)  # TODO
 
 
 # %%
-# Step 8 : Define the function to convert the dataframe to a markdown table
+# Step 12 : Define the function to convert the dataframe to a markdown table
 def df_to_markdown_table(df, higher_is_better=True):
     # Convert to float and find best indices
     df_float = df.select_dtypes(include=["number"])
@@ -355,7 +414,7 @@ if "Classifier" in results_log.columns:
     results_log.set_index("Classifier", inplace=True)
 
 # %%
-# Step 9 : Display the results
+# Step 13 : Display the results
 mo.md(
     "## Accuracy Results\n"
     + df_to_markdown_table(results_acc, higher_is_better=True)
@@ -371,5 +430,3 @@ mo.md(
     + f"{get_best_metric(results_log, 'Log Loss', higher_is_better=False)}\n\n"
     + f"{get_best_metric(results_ece, 'ECE', higher_is_better=False)}"
 )
-
-# %%

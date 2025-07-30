@@ -22,7 +22,6 @@ from sklearn.metrics import brier_score_loss, accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 import calibration as cal
 
-
 # %%
 # Step 1 : Data loading
 
@@ -39,8 +38,7 @@ print(___)  # TODO
 
 # %%
 # Step 2 : Data Preparation
-numeric_cols = df.___(include=[np.number]).___  # TODO
-X = df[___]  # TODO
+X = df.___(include=["___"])  # TODO
 
 label_cols = [
     "25400",
@@ -81,14 +79,22 @@ X_proper_train, X_cal, y_proper_train, y_cal = ___(  # TODO
     ___,  # TODO
 )
 
-print(X_train.head())
-print(y_train.head())
-print(X_test.head())
-print(y_test.head())
-print(X_proper_train.head())
-print(y_proper_train.head())
-print(X_cal.head())
-print(y_cal.head())
+print(f"\n X_train :\n{X_train.head()}")
+print(f"shape : {X_train.shape}")
+print(f"\n y_train :\n{y_train.head()}")
+print(f"shape : {y_train.shape}")
+print(f"\n X_test :\n{X_test.head()}")
+print(f"shape : {X_test.shape}")
+print(f"\n y_test :\n{y_test.head()}")
+print(f"shape : {y_test.shape}")
+print(f"\n X_proper_train :\n{X_proper_train.head()}")
+print(f"shape : {X_proper_train.shape}")
+print(f"\n y_proper_train :\n{y_proper_train.head()}")
+print(f"shape : {y_proper_train.shape}")
+print(f"\n X_cal :\n{X_cal.head()}")
+print(f"shape : {X_cal.shape}")
+print(f"\n y_cal :\n{y_cal.head()}")
+print(f"shape : {y_cal.shape}")
 
 # %%
 # Step 4 : Multi-output classifier non calibrated
@@ -97,6 +103,9 @@ multi_clf = ___(base_clf)  # TODO
 multi_clf.___(__, ___)  # TODO
 pred_probs_uncalibrated = multi_clf.___(___)  # TODO
 pred_y_uncalibrated = multi_clf.___(___)  # TODO
+
+print(f"\n pred_probs_uncalibrated :\n{pred_probs_uncalibrated}")
+print(f"\n pred_y_uncalibrated :\n{pred_y_uncalibrated}")
 
 # %%
 # Step 5 : Model calibration
@@ -117,33 +126,41 @@ pred_probs_calibrated_matrix = np.vstack(___).T  # TODO
 pred_y_uncalibrated_matrix = np.column_stack(___).T  # TODO
 pred_y_calibrated_matrix = np.column_stack(___)  # TODO
 
+print(f"pred_probs_uncalibrated_matrix:\n{pred_probs_uncalibrated_matrix}")
+print(f"shape: {pd.DataFrame(pred_probs_uncalibrated_matrix).shape}")
+print(f"pred_probs_calibrated_matrix:\n{pred_probs_calibrated_matrix}")
+print(f"shape: {pd.DataFrame(pred_probs_calibrated_matrix).shape}")
+print(f"pred_y_uncalibrated_matrix:\n{pred_y_uncalibrated_matrix}")
+print(f"shape: {pd.DataFrame(pred_y_uncalibrated_matrix).shape}")
+print(f"pred_y_calibrated_matrix:\n{pred_y_calibrated_matrix}")
+print(f"shape: {pd.DataFrame(pred_y_calibrated_matrix).shape}")
+
 # %%
 # Step 6 : Compute metrics
-
 brier_scores_uncalibrated = [
-    brier_score_loss(y_test.iloc[:, i], pred_probs_uncalibrated_matrix[:, i])
+    brier_score_loss(___.iloc[:, i], ___[:, i])  # TODO
     for i in range(y.shape[1])
 ]
 brier_scores_calibrated = [
-    brier_score_loss(y_test.iloc[:, i], pred_probs_calibrated_matrix[:, i])
+    brier_score_loss(___.iloc[:, i], ___[:, i])  # TODO
     for i in range(y.shape[1])
 ]
 
 accuracy_scores_uncalibrated = [
-    accuracy_score(y_test.iloc[:, i], pred_y_uncalibrated_matrix[:, i])
+    accuracy_score(___.iloc[:, i], ___[:, i])  # TODO
     for i in range(y_test.shape[1])
 ]
 accuracy_scores_calibrated = [
-    accuracy_score(y_test.iloc[:, i], pred_y_calibrated_matrix[:, i])
+    accuracy_score(___.iloc[:, i], ___[:, i])  # TODO
     for i in range(y_test.shape[1])
 ]
 
 ece_scores_uncalibrated = [
-    cal.get_calibration_error(pred_probs_uncalibrated_matrix[:, i], y_test.iloc[:, i])
+    cal.get_calibration_error(___.iloc[:, i], ___[:, i])  # TODO
     for i in range(y.shape[1])
 ]
 ece_scores_calibrated = [
-    cal.get_calibration_error(pred_probs_calibrated_matrix[:, i], y_test.iloc[:, i])
+    cal.get_calibration_error(___.iloc[:, i], ___[:, i])  # TODO
     for i in range(y.shape[1])
 ]
 
@@ -174,7 +191,6 @@ ece_score_df = pd.DataFrame(
 
 # %%
 # Step 7 : Visualisation
-
 # Plot Accuracy per label before and after calibration
 plt.figure(figsize=(10, 5))
 accuracy_long = accuracy_score_df.melt(

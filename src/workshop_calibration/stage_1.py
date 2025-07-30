@@ -38,13 +38,12 @@ pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
 
-data = arff.loadarff("../../data/")  # TODO
+data = arff.loadarff("../../data/___")  # TODO
 df = pd.DataFrame(data[0])
 
 print(df.head(___))  # TODO
 
 # %%
-
 # Step 2 : Balancing the classes by oversampling
 majority = df[df.___ == df.label.value_counts().idxmax()]  # TODO
 minority = df[df.label == df.label.___.___()]  # TODO
@@ -65,7 +64,7 @@ print(df.head(10))
 X = df.drop(columns=["___"])  # TODO
 y = df["___"].astype(___).values  # TODO
 print(X.head(10))
-print(y.head(10))
+print(pd.DataFrame(y, columns=["label"]).head(10))
 
 # %%
 # Step 4 : Feature Scaling
@@ -128,12 +127,12 @@ for name_model in models.keys():
 # %%
 # Step 8 : Example of model training
 print("Example of model training and evaluation")
-model_example = LogisticRegression(
-    max_iter=5000,
-    random_state=random_state,
+model_example = ___(  # TODO
+    ___,  # TODO
+    ___,  # TODO
 )
 model_example.fit(___, ___)  # TODO
-probs_example = model_example.predict_proba(___)[:, 1]  # TODO
+probs_example = model_example.predict_proba(___)[:, ___]  # TODO
 preds_example = model_example.predict(___)  # TODO
 
 print(probs_example[:5])
@@ -176,16 +175,24 @@ for name, model in models.items():
 
 # %%
 # Step 11 : Example of model calibration : Sigmoid and Isotonic
+model_example.fit(X_proper_train, y_proper_train)
+
 for method in ["___", "___"]:  # TODO
     print(f"\nCalibrating LogisticRegression with {method} method")
     # Wrap with CalibratedClassifierCV using the chosen method
     calibrated_model = CalibratedClassifierCV(
-        estimator=___, method=___, cv="prefit"  # TODO  # TODO  # TODO
+        estimator=___,  # TODO
+        method=___,  # TODO
+        cv="prefit",
     )
     calibrated_model.fit(___, ___)  # TODO
+
     # Predict probabilities and classes on the test set
     probs_cal = calibrated_model.predict_proba(___)[:, 1]  # TODO
     preds_cal = calibrated_model.predict(___)  # TODO
+    print(f"Probs calibration: {probs_cal[:5]}")
+    print(f"Preds calibration: {preds_cal[:5]}")
+
     # Evaluate
     acc_cal = f1_score(___, ___)  # TODO
     brier_cal = brier_score_loss(___, ___)  # TODO
@@ -197,7 +204,7 @@ for method in ["___", "___"]:  # TODO
     print(f"Expected Calibration Error: {ece_cal:.3f}")
 
 # %%
-# Step 12 : Example of model calibration : Venn-ABERS
+# Step 12 : Example of model calibration : Venn-ABERS (part 1 : calibration)
 print("\nCalibrating LogisticRegression with Venn-ABERS method")
 # Fit the model on the proper training set
 model_example.fit(___, ___)  # TODO
@@ -208,7 +215,11 @@ p_test = model_example.predict_proba(___)  # TODO
 va = VennAbersCalibrator()
 probs_va = va.predict_proba(p_cal=___, y_cal=np.array(___), p_test=___)[:, 1]  # TODO
 preds_va = va.predict(p_cal=___, y_cal=np.array(___), p_test=___)[:, 1]  # TODO
-# Evaluate
+print(f"Probs calibration: {probs_va[:5]}")
+print(f"Preds calibration: {preds_va[:5]}")
+
+# %%
+# Step 13 : Example of model calibration : Venn-ABERS (part 2 : evaluation)
 acc_va = f1_score(___, ___)  # TODO
 brier_va = brier_score_loss(___, ___)  # TODO
 logloss_va = log_loss(___, ___)  # TODO
@@ -218,9 +229,8 @@ print(f"Brier Score: {brier_va:.3f}")
 print(f"Log Loss: {logloss_va:.3f}")
 print(f"Expected Calibration Error: {ece_va:.3f}")
 
-
 # %%
-# Step 13 : Model Calibration
+# Step 14 : Model Calibration
 def calibration():
     for name in models.keys():
         for method in ["sigmoid", "isotonic"]:
@@ -280,7 +290,7 @@ calibration()
 
 
 # %%
-# Step 14: Plot Results
+# Step 15: Plot Results
 def plot():
     plt.figure(figsize=(8, 6))
     for name in [
@@ -345,7 +355,7 @@ plot()
 
 
 # %%
-# Step 15 : Run metrics function
+# Step 16 : Run metrics function
 def run_metrics(clf, X_test, y_test, results, probs=None, preds=None, va=False):
     if probs is None and preds is None:
         probs = clf.predict_proba(X_test)[:, 1]
@@ -365,7 +375,7 @@ def run_metrics(clf, X_test, y_test, results, probs=None, preds=None, va=False):
 
 
 # %%
-# Step 16 : Model Comparison
+# Step 17 : Model Comparison
 def compare_methods():
     # Prepare results storage
     metrics = ["accuracy", "brier", "log loss", "ece"]
@@ -392,7 +402,7 @@ def compare_methods():
     run_metrics(___, ___, ___, ___)  # TODO
 
     # Isotonic prefit
-    clf = GaussianNB()
+    clf = ___  # TODO
     clf.fit(___, ___)  # TODO
     iso_prefit = CalibratedClassifierCV(___, method="___", cv="___")  # TODO
     iso_prefit.fit(___, ___)  # TODO
@@ -411,7 +421,7 @@ def compare_methods():
     run_metrics(___, ___, ___, ___)  # TODO
 
     # Prefit
-    clf = GaussianNB()
+    clf = ___  # TODO
     clf.fit(___, ___)  # TODO
     p_cal = clf.predict_proba(___)  # TODO
     p_test = clf.predict_proba(___)  # TODO
@@ -427,6 +437,7 @@ def compare_methods():
         estimator=GaussianNB(),
         inductive=___,  # TODO
         cal_size=___,  # TODO
+        random_state=0,
     )
     va.fit(___, ___)  # TODO
     run_metrics(___, ___, ___, ___, ___, ___)  # TODO
@@ -436,6 +447,7 @@ def compare_methods():
         estimator=GaussianNB(),
         inductive=___,  # TODO
         n_splits=___,  # TODO
+        random_state=0,
     )
     va.fit(___, ___)  # TODO
     run_metrics(___, ___, ___, ___, ___, ___)  # TODO
