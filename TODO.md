@@ -3,11 +3,14 @@
 This workshop is organized into three progressive stages, each focusing on a distinct aspect of model calibration and reliable AI predictions. In every stage, you will encounter sections of code with intentional gaps to be completed. Carefully follow the provided instructions and implement each step sequentially to build meaningful and functional solutions.
 
 ### **Directory Structure :**
-- [simple_class_calibration.py](src/calibration_test/simple_class_calibration.py) – Binary classification calibration
-- [multi_class_calibration.py](src/calibration_test/multi_class_calibration.py) – Multi-class calibration
-- [multi_label_calibration.py](src/calibration_test/multi_label_calibration.py) – Multi-label calibration
+- [simple_class_calibration.py](src/workshop_calibration/stage_1.py) – Binary classification calibration
+- [multi_class_calibration.py](src/workshop_calibration/stage_2.py) – Multi-class calibration
+- [multi_label_calibration.py](src/workshop_calibration/stage_3.py) – Multi-label calibration
 
-## Stage 1 : [Binary Calibration (Simple Calibration)](src/calibration_test/simple_class_calibration.py)
+## Stage 1 : Binary Classification Calibration
+
+- **Workshop to complete:** [src/workshop_calibration/stage_1.py](src/workshop_calibration/stage_1.py)
+- **Related course:** [Calibration Tutorial - Calibration for Binary Classification](calibration_tutorial.md#calibration-for-binary-classification-simple-calibration)
 
 ### **Objective :**
 Calibrate a binary classification model so that its predicted probabilities reflect reality.
@@ -115,7 +118,10 @@ Calibrate a binary classification model so that its predicted probabilities refl
 
 ---
 
-## Stage 2 : [Multi-class Calibration](src/calibration_test/multi_class_calibration.py)
+## Stage 2 : Multi-class Calibration
+
+- **Workshop to complete:** [src/workshop_calibration/stage_2.py](src/workshop_calibration/stage_2.py)
+- **Related course:** [Calibration Tutorial - Calibration for Multi-class Models](calibration_tutorial.md#calibration-for-multi-class-models)
 
 ### **Objective :**
 Adapt calibration techniques to a multi-class classification problem.
@@ -198,7 +204,10 @@ Adapt calibration techniques to a multi-class classification problem.
 
 ---
 
-## Stage 3 : [Multi-label Calibration](src/calibration_test/multi_label_calibration.py)
+## Stage 3 : Multi-label Calibration
+
+- **Workshop to complete:** [src/workshop_calibration/stage_3.py](src/workshop_calibration/stage_3.py)
+- **Related course:** [Calibration Tutorial - Calibration for Multi-label Models](calibration_tutorial.md#calibration-for-multi-label-models)
 
 ### **Objective :**
 Calibrate a multi-label classification model where each sample can belong to multiple classes.
