@@ -266,7 +266,7 @@ calibration()
 
 
 # %%
-# Step 14: Plot Results
+# Step 15: Plot Results
 def plot():
     plt.figure(figsize=(8, 6))
     for name in [
@@ -331,7 +331,7 @@ plot()
 
 
 # %%
-# Step 15 : Run metrics function
+# Step 16 : Run metrics function
 def run_metrics(clf, X_test, y_test, results, probs=None, preds=None, va=False):
     if probs is None and preds is None:
         probs = clf.predict_proba(X_test)[:, 1]
@@ -351,7 +351,7 @@ def run_metrics(clf, X_test, y_test, results, probs=None, preds=None, va=False):
 
 
 # %%
-# Step 16 : Model Comparison
+# Step 17 : Model Comparison
 def compare_methods():
     # Prepare results storage
     metrics = ["accuracy", "brier", "log loss", "ece"]
