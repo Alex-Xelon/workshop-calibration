@@ -191,16 +191,16 @@ Adapt calibration techniques to a multi-class classification problem.
    - Calibrate the **prefitted** model with method **isotonic** using `CalibratedClassifierCV` and fit the calibrated model on the **calibration set**
    - Fulfill the metrics fonction with the test set
 
-### Step 7 : Calibration Comparison
+### Step 11 : Calibration Comparison
 - Loop through each classifier `clf_name` in the `clfs` dictionary.
 - For each classifier, run the calibration comparison function `run_multiclass_comparison` with the correct arguments.
 - Add the results from each classifier to the overall results DataFrames, making sure to ignore the index when combining them.
 
-### Step 8 : Plot Results
-- Execute the following cell to plot the results of the calibration methods.
+### Step 12 : convert dataframe to markdown table function and get best metric function
+- Execute the following cell to define the function to convert the dataframe to a markdown table
 
-### Step 9 : Run metrics function
-- Execute the following cell to run the metrics function used in the previous step
+### Step 13 : Display results
+- Execute the following cell to display the results of the calibration methods.
 
 ---
 
@@ -220,8 +220,8 @@ Calibrate a multi-label classification model where each sample can belong to mul
 - Load the dataset from the dataset path for stage 3 using `loadarff` method from `arff` library.
 
 ### Step 2 : Data Preparation
-- Select all numeric columns from the DataFrame using `select_dtypes()` and assign them to `X`.
-- Use label_cols to assign the labels `y` and convert values to integers.
+- Select all numeric columns from the DataFrame using `select_dtypes()` method and `include=["number"]` parameter to assign them to `X`.
+- Use `label_cols` to assign the labels `y` and convert values to integers.
 
 ### Step 3 : Data Splitting
 - Split the data into training and test sets using `train_test_split`, allocating 90% for testing and 10% for training, without shuffling, and set the random_state parameter to `random_state` variable.

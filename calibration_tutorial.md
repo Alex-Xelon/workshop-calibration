@@ -137,7 +137,7 @@ In the code above, `cv="prefit"` tells sklearn that we have already trained the 
 
 #### **Calibration curves (reliability diagrams)**
 
-Calibration curves how how well a classifier's predicted probabilities match the actual observed frequencies of the positive class.
+Calibration curves show how well a classifier's predicted probabilities match the actual observed frequencies of the positive class.
 On the plot, the x-axis represents the predicted probability and the y-axis shows the true fraction of positives among samples assigned that probability.
 A perfectly calibrated model will have its curve follow the diagonal line (where predicted probability equals observed frequency). Deviations from the diagonal indicate over- or under-confidence in the model's probability estimates.
 
