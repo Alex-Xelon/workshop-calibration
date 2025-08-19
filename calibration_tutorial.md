@@ -34,7 +34,7 @@ To check calibration of a binary classifier, the most common tool is the **calib
 
 The process of *calibration* typically means taking an already-trained classifier and learning a **calibration function** to adjust its output probabilities to better match observed outcomes. This is usually done on a separate **calibration dataset** (hold-out data not used in training, or via cross-validation), to avoid simply overfitting the training data.
 
-Two widely used calibration techniques for binary classifiers are *Platt scaling*, *isotonic regression* and *Venn-Abers Predictors* :
+Three widely used calibration techniques for binary classifiers are *Platt scaling*, *isotonic regression* and *Venn-Abers Predictors* :
 
 - **Platt Scaling (Sigmoid Calibration):**
   This method fits a logistic regression (sigmoid) to the model’s output scores vs the true labels. Essentially, it learns a S-shaped curve to map raw outputs to calibrated probabilities. Platt scaling is simple and works well even with smaller datasets, but it does assume the calibration function is sigmoidal (which may not hold if the true calibration curve is not S-shaped). It was originally popularized for calibrating SVM outputs, and in practice it learns two parameters ($\alpha$, $\beta$) such that:
@@ -49,13 +49,12 @@ $$\text{calibrated\_p} = \sigma(\alpha \cdot \text{score} + \beta)$$
 - **Without prefit** (e.g. **cv=5**): the model is retrained inside `CalibratedClassifierCV`, and calibration is performed on validation folds from the training set.
 
     ```python
-    model = RandomForestClassifier().fit(X_train_proper, y_train_proper)
     calibrator = CalibratedClassifierCV(
-        model,
+        RandomForestClassifier(),
         method="isotonic",
         cv=5
     )
-    calibrator.fit(X_cal, y_cal)
+    calibrator.fit(X_train, y_train)
     ```
 
 - **With prefit**: you first train the model on a small proper training set, and then calibrate it on a larger calibration set. This is more flexible and avoids retraining.
@@ -131,7 +130,7 @@ calibrator.fit(X_cal, y_cal)  # fit calibration on held-out data
 probs = calibrator.predict_proba(X_test)
 ```
 
-In the code above, `cv="prefit"` tells sklearn that we have already trained the base classifier (`base_model`) and we are providing an explicit calibration set (`X_cal`, `y_cal`). Alternatively, if we set `cv=5` (for example), `CalibratedClassifierCV` would internally perform 5 cross-validation folds on `X_proper_train`, `y_proper_train` to derive calibration data – but using a dedicated set (if available) often yields better calibration.
+In the code above, `cv="prefit"` tells sklearn that we have already trained the base classifier (`base_model`) and we are providing an explicit calibration set (`X_cal`, `y_cal`). Alternatively, if we set `cv=5` (for example), `CalibratedClassifierCV` would internally perform 5 cross-validation folds on `X_train`, `y_train` to derive calibration data – but using a dedicated set (if available) often yields better calibration.
 
 **Visualizing the effect:** The impact of calibration can be seen in calibration plots. Below is an example calibration curves and metrics comparing a well-calibrated model vs. a miscalibrated one, before and after applying calibration.
 
