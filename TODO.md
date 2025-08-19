@@ -63,8 +63,7 @@ Calibrate a binary classification model so that its predicted probabilities refl
 ### Step 11 : Example of model calibration : Sigmoid and Isotonic
 - For each calibration method ("sigmoid" and "isotonic"), create a `CalibratedClassifierCV` using the already-fitted `model_example` as the estimator, set `method` to the current calibration method, and `cv="prefit"`.
 - Fit the calibrated model on the **calibration set**.
-- Use the calibrated model to predict probabilities for the positive class and predicted classes on the **test set**.
-- Compute the F1 score, Brier score, log loss, and Expected Calibration Error using the true test labels `y_test` and the predictions (predicted classes `preds_cal` or probabilities `probs_cal` as appropriate).
+- Use the calibrated model to predict probabilities for the positive class and predicted classes on the **test set** using `predict_proba` and `predict` methods.
 
 ### Step 12 : Example of model calibration : Venn-Abers (part 1 : calibration)
 - Fit the model on the **proper training set**.
@@ -72,7 +71,7 @@ Calibrate a binary classification model so that its predicted probabilities refl
 - Predict probabilities for the positive class and true labels methods with predicted probabilities `p_cal` and true labels `y_cal` from the calibration set and predicted probabilities `p_test` from the test set.
 
 ### Step 13 : Example of model calibration : Venn-Abers (part 2 : evaluation)
-- Compute the F1 score (`f1_score`), Brier score (`brier_score_loss`), log loss (`log_loss`), and Expected Calibration Error (`get_calibration_error` method from `cal` object) using the true test labels and the predictions (predicted classes or probabilities as appropriate).
+- Execute the following cell to compute the F1 score, Brier score, log loss, and Expected Calibration Error using the true test labels `y_test` and the predictions (predicted classes `preds_cal` or probabilities `probs_cal` as appropriate).
 
 ### Step 14 : Model Calibration
 - Execute the following cell to extend the example of model calibration to all models in the `models` dictionary.
@@ -160,12 +159,11 @@ Adapt calibration techniques to a multi-class classification problem.
 - Predict probabilities for the positive class and true labels methods with `predict_proba` and `predict` methods and test set and one_hot parameter set to False.
 
 ### Step 8 : Example of metrics : Venn-Abers
-- Compute the F1 score with average parameter set to `weighted`, Brier score, log loss, and Expected Calibration Error using the true test labels and the predictions (predicted classes or probabilities as appropriate).
+- Execute the following cell to compute the F1 score, Brier score, log loss, and Expected Calibration Error using the true test labels `y_test` and the predictions (predicted classes `preds_cal` or probabilities `probs_cal` as appropriate).
 
 ### Step 9 : Define the metrics
 - Determine probabilities and classes for the **test set** using the `predict_proba` and `predict` methods of the classifier either with or without Venn-Abers calibration. Set `one_hot` parameter to False if Venn-Abers calibration is used.
-- Calculate the F1 score for multi-class classification on the test set using the weighted approach to ensure your method is suitable for imbalanced class distribution.
-- Calculate the log loss, Brier score and ECE for the test set using the `log_loss`, `brier_score_loss` and `get_calibration_error` method from `cal` object.
+- Calculate the F1 score for multi-class classification on the test set using the **weighted** approach to ensure your method is suitable for imbalanced class distribution.
 
 ### Step 10 : Calibrate the models
 - **Base model** :
@@ -174,31 +172,27 @@ Adapt calibration techniques to a multi-class classification problem.
    - Use `VennAbersCalibrator` to calibrate the model with **inductive** approach and set the size of the calibration to 0.2, then fit the calibrated model on the **training set**
    - Fulfill the metrics fonction with the **test set** with VennAbersCalibrator parameter set to True
 - **CVAP** :
-   - Use `VennAbersCalibrator` to calibrate the model with **cross-validation** approach and **5 splits**, then fit the calibrated model on the **training set**
+   - Use `VennAbersCalibrator` to calibrate the model with **cross-validation** approach and **5 splits**
    - Fulfill the metrics fonction with the **test set** with VennAbersCalibrator parameter set to False
 - **Sigmoid cv** :
-   - Use `CalibratedClassifierCV` with method **sigmoid** and **5-fold** cross-validation to calibrate the model, then fit the calibrated model on the **training set**
-   - Fulfill the metrics fonction with the test set
+   - Use `CalibratedClassifierCV` with method **sigmoid** and size of the calibration set to **0.2**, then fit the calibrated model on the **training set**
 - **Isotonic cv** :
-   - Use `CalibratedClassifierCV` with method **isotonic** and **5-fold** cross-validation to calibrate the model, then fit the calibrated model on the **training set**
-   - Fulfill the metrics fonction with the test set
+   - Use `CalibratedClassifierCV` with method **isotonic** and **5-fold** cross-validation to calibrate the model
 - **Sigmoid** :
-   - Fit the model on the proper training set using `fit`
+   - Fit the model on the **proper training set** using `fit`
    - Calibrate the **prefitted** model with method **sigmoid** using `CalibratedClassifierCV` and fit the calibrated model on the **calibration set**
-   - Fulfill the metrics fonction with the test set
 - **Isotonic** :
-   - Calibrate the **prefitted** model with method **isotonic** using `CalibratedClassifierCV` and fit the calibrated model on the **calibration set**
-   - Fulfill the metrics fonction with the test set
+   - Calibrate the **prefitted** model with method **isotonic** using `CalibratedClassifierCV`
 
-### Step 7 : Calibration Comparison
+### Step 11 : Calibration Comparison
 - Loop through each classifier `clf_name` in the `clfs` dictionary.
 - For each classifier, run the calibration comparison function `run_multiclass_comparison` with the correct arguments.
 - Add the results from each classifier to the overall results DataFrames, making sure to ignore the index when combining them.
 
-### Step 8 : Plot Results
+### Step 12 : Plot Results
 - Execute the following cell to plot the results of the calibration methods.
 
-### Step 9 : Run metrics function
+### Step 13 : Run metrics function
 - Execute the following cell to run the metrics function used in the previous step
 
 ---
@@ -228,7 +222,7 @@ Calibrate a multi-label classification model where each sample can belong to mul
 
 ### Step 4 : Base Model Training and Evaluation
 - Instantiate a base classifier using `RandomForestClassifier` with the specified `random_state`.
-- Wrap the base classifier with `MultiOutputClassifier` to enable multi-label classification.
+- Wrap the **base classifier** with `MultiOutputClassifier` to enable multi-label classification.
 - Fit the multi-label classifier on the **training data**.
 - Predict the class probabilities and labels for the **test set**.
 
@@ -240,9 +234,9 @@ Calibrate a multi-label classification model where each sample can belong to mul
 > Note: You can use the transpose to flip the matrix and obtain the correct format if needed.
 
 ### Step 6 : Compute metrics
-- For each label in the **test set**, compute the Brier score for both the uncalibrated and calibrated models with pred_probs_uncalibrated_matrix and pred_probs_calibrated_matrix
-- For each label, compute the accuracy for both the uncalibrated and calibrated models with pred_y_uncalibrated_matrix and pred_y_calibrated_matrix
-- For each label, compute the Expected Calibration Error (ECE) for both the uncalibrated and calibrated models with pred_probs_uncalibrated_matrix and pred_probs_calibrated_matrix
+- For each label in the **test set**, compute the Brier score for both the uncalibrated and calibrated models with `pred_probs_uncalibrated_matrix` and `pred_probs_calibrated_matrix`
+- For each label, compute the accuracy for both the uncalibrated and calibrated models with `pred_y_uncalibrated_matrix` and `pred_y_calibrated_matrix`
+- For each label, compute the Expected Calibration Error (ECE) for both the uncalibrated and calibrated models with `pred_probs_uncalibrated_matrix` and `pred_probs_calibrated_matrix`
 
 ### Step 7 : Visualisation
 - Execute the following cell to plot the results of the calibration methods.

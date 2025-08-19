@@ -44,7 +44,7 @@ print(df.head(10))
 # %%
 # Step 2 : Data preparation
 X = df.drop(___)  # TODO
-y = df["___"].astype(___).subtract(___)  # TODO
+y = df["Class"].astype(___).subtract(___)  # TODO
 
 print(X.head(5))
 print(y.head(5))
@@ -52,8 +52,8 @@ print(y.head(5))
 # %%
 # Step 3 : Data Splitting for Training, Calibration and Testing
 X_train, X_test, y_train, y_test = train_test_split(
-    ___,  # TODO
-    ___,  # TODO
+    X,
+    y,
     test_size=___,  # TODO
     shuffle=___,  # TODO
 )
@@ -61,8 +61,8 @@ X_train, X_test, y_train, y_test = train_test_split(
 X_proper_train, X_cal, y_proper_train, y_cal = ___(
     ___,  # TODO
     ___,  # TODO
-    test_size=___,  # TODO
-    shuffle=___,  # TODO
+    test_size=0.2,
+    shuffle=False,
 )
 
 print(X_train.head(5))
@@ -139,10 +139,10 @@ print(f"Preds calibration: \n{pd.DataFrame(preds_va).head(10)}")
 
 # %%
 # Step 8 : Example of metrics : VennAbersCalibrator
-acc_va = f1_score(___, ___, average="___")  # TODO
-brier_va = brier_score_loss(___, ___)  # TODO
-logloss_va = log_loss(___, ___)  # TODO
-ece_va = cal.get_calibration_error(___, ___)  # TODO
+acc_cal = f1_score(y_test, preds_cal, average="weighted")
+brier_cal = brier_score_loss(y_test, probs_cal)
+logloss_cal = log_loss(y_test, probs_cal)
+ece_cal = cal.get_calibration_error(probs_cal, y_test)
 print(f"Score Accuracy: {acc_va:.3f}")
 print(f"Brier Score: {brier_va:.3f}")
 print(f"Log Loss: {logloss_va:.3f}")
@@ -162,12 +162,12 @@ def metrics(
     VennAbersCalibrator=False,
 ):
     if VennAbersCalibrator:
-        p_pred = clf.predict_proba(___)  # TODO
-        y_pred = clf.predict(___, one_hot=___)  # TODO
+        p_pred = clf.___(X_test)  # TODO
+        y_pred = clf.___(X_test, one_hot=False)  # TODO
     else:
-        p_pred = clf.predict_proba(___)  # TODO
+        p_pred = clf.predict_proba(X_test)  # TODO
         y_pred = clf.predict(X_test)
-    acc_list.append(f1_score(y_test, y_pred, average="weighted"))
+    acc_list.append(f1_score(y_test, y_pred, average="___"))
     log_loss_list.append(log_loss(y_test, p_pred))
     brier_loss_list.append(brier_score_loss(y_test, p_pred))
     ece_list.append(cal.get_calibration_error(p_pred, y_test))
@@ -222,7 +222,7 @@ def run_multiclass_comparison(clf_name, clf):
         n_splits=___,  # TODO
         random_state=28,
     )
-    va_cv.fit(___, ___)  # TODO
+    va_cv.fit(X_train, y_train)
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
         ___,  # TODO
         ___,  # TODO
@@ -242,9 +242,9 @@ def run_multiclass_comparison(clf_name, clf):
     )
     cal_sigm_cv.fit(___, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        ___,  # TODO
-        ___,  # TODO
-        ___,  # TODO
+        cal_sigm_cv,
+        X_test,
+        y_test,
         acc_list,
         log_loss_list,
         brier_loss_list,
@@ -253,15 +253,15 @@ def run_multiclass_comparison(clf_name, clf):
 
     print("isotonic_cv")
     cal_iso_cv = CalibratedClassifierCV(
-        estimator=___,  # TODO
+        estimator=clf,
         method="___",  # TODO
-        cv=___,  # TODO
+        cv="___",  # TODO
     )
-    cal_iso_cv.fit(___, ___)  # TODO
+    cal_iso_cv.fit(X_train, y_train)
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        ___,  # TODO
-        ___,  # TODO
-        ___,  # TODO
+        cal_iso_cv,
+        X_test,
+        y_test,
         acc_list,
         log_loss_list,
         brier_loss_list,
@@ -271,18 +271,19 @@ def run_multiclass_comparison(clf_name, clf):
     print("sigmoid")
     clf = clf.fit(___, ___)  # TODO
     cal_sigm = CalibratedClassifierCV(
-        ___,  # TODO
+        estimator=clf,
         method="___",  # TODO
         cv="___",  # TODO
     )
     cal_sigm.fit(___, ___)  # TODO
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        ___,  # TODO
-        ___,  # TODO
-        ___,  # TODO
-        ___,  # TODO
-        ___,  # TODO
-        ___,  # TODO
+        cal_sigm,
+        X_test,
+        y_test,
+        acc_list,
+        log_loss_list,
+        brier_loss_list,
+        ece_list,
     )
 
     print("isotonic \n")
@@ -291,11 +292,11 @@ def run_multiclass_comparison(clf_name, clf):
         ___,  # TODO
         ___,  # TODO
     )
-    cal_iso.fit(___, ___)  # TODO
+    cal_iso.fit(X_cal, y_cal)
     acc_list, log_loss_list, brier_loss_list, ece_list = metrics(
-        ___,  # TODO
-        ___,  # TODO
-        ___,  # TODO
+        cal_iso,
+        X_test,
+        y_test,
         acc_list,
         log_loss_list,
         brier_loss_list,
@@ -369,12 +370,12 @@ results_ece = pd.DataFrame()
 for ___ in clfs:
     scratch_b, scratch_l, scratch_acc, scratch_ece = run_multiclass_comparison(
         ___,  # TODO
-        clfs[___],  # TODO
+        clfs[clf_name],
     )
     results_brier = pd.concat([___, ___], ignore_index=True)  # TODO
     results_log = pd.concat([___, ___], ignore_index=True)  # TODO
     results_acc = pd.concat([___, ___], ignore_index=True)  # TODO
-    results_ece = pd.concat([___, ___], ignore_index=___)  # TODO
+    results_ece = pd.concat([___, ___], ignore_index=True)  # TODO
 
 
 # %%

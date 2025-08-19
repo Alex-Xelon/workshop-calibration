@@ -32,14 +32,14 @@ pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
 
-data = arff.___(___)  # TODO
+data = arff.___("../../data/dataset_stage_3.arff")  # TODO
 df = pd.DataFrame(data[0])
 
-print(df.head())
+print(df.head(10))
 
 # %%
 # Step 2 : Data Preparation
-X = df.___(include=["___"])  # TODO
+X = df.___(include=["number"])  # TODO
 
 label_cols = [
     "25400",
@@ -65,18 +65,18 @@ print(y.head())
 # %%
 # Step 3 : Data Splitting
 X_train, X_test, y_train, y_test = train_test_split(
-    ___,  # TODO
-    ___,  # TODO
+    X,
+    y,
     test_size=___,  # TODO
-    shuffle=___,  # TODO
+    shuffle=False,
     random_state=random_state,
 )
 
 X_proper_train, X_cal, y_proper_train, y_cal = train_test_split(
-    ___,  # TODO
-    ___,  # TODO
+    X_train,
+    y_train,
     test_size=___,  # TODO
-    shuffle=___,  # TODO
+    shuffle=False,
     random_state=random_state,
 )
 
@@ -149,21 +149,21 @@ brier_scores_calibrated = [
 ]
 
 accuracy_scores_uncalibrated = [
-    accuracy_score(___.iloc[:, i], ___[:, i])  # TODO
+    accuracy_score(y_test.iloc[:, i], ___[:, i])  # TODO
     for i in range(y_test.shape[1])
 ]
 accuracy_scores_calibrated = [
-    accuracy_score(___.iloc[:, i], ___[:, i])  # TODO
+    accuracy_score(y_test.iloc[:, i], ___[:, i])  # TODO
     for i in range(y_test.shape[1])
 ]
 
 ece_scores_uncalibrated = [
-    cal.get_calibration_error(___[:, i], ___.iloc[:, i])  # TODO
-    for i in range(y_test.shape[1])
+    cal.get_calibration_error(___[:, i], y_test.iloc[:, i])  # TODO
+    for i in range(___.shape[1])  # TODO
 ]
 ece_scores_calibrated = [
-    cal.get_calibration_error(___[:, i], ___.iloc[:, i])  # TODO
-    for i in range(y_test.shape[1])
+    cal.get_calibration_error(___[:, i], y_test.iloc[:, i])  # TODO
+    for i in range(___.shape[1])  # TODO
 ]
 
 # Summary in a DataFrame
