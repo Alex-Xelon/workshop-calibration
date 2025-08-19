@@ -137,7 +137,7 @@ In the code above, `cv="prefit"` tells sklearn that we have already trained the 
 
 #### **Calibration curves (reliability diagrams)**
 
-Calibration curves how how well a classifier's predicted probabilities match the actual observed frequencies of the positive class.
+Calibration curves show how well a classifier's predicted probabilities match the actual observed frequencies of the positive class.
 On the plot, the x-axis represents the predicted probability and the y-axis shows the true fraction of positives among samples assigned that probability.
 A perfectly calibrated model will have its curve follow the diagonal line (where predicted probability equals observed frequency). Deviations from the diagonal indicate over- or under-confidence in the model's probability estimates.
 
@@ -250,14 +250,14 @@ from sklearn.calibration import CalibratedClassifierCV
 # base model for each label
 base_clf = RandomForestClassifier()
 # Y_train has multiple label columns
-multi_clf = MultiOutputClassifier(base_clf).fit(X_train, Y_train) 
+multi_clf = MultiOutputClassifier(base_clf).fit(X_train, Y_train)
 
 # Calibrate each label-specific classifier
 calibrated_clfs = []
 for label_idx in range(Y_train.shape[1]):
     clf_label = CalibratedClassifierCV(base_clf, method="sigmoid", cv=5)
     # fit on that label's column
-    clf_label.fit(X_calib, Y_calib.iloc[:, label_idx])  
+    clf_label.fit(X_calib, Y_calib.iloc[:, label_idx])
     calibrated_clfs.append(clf_label)
 
 # Now calibrated_clfs[i] can predict probabilities for label i
